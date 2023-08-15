@@ -1,0 +1,114 @@
+//Variables
+$primary-font: "DM Sans", sans-serif;
+
+//Body style
+body {
+  width: 100%;
+  height: 100%;
+  min-width: 400px;
+  //Background style
+  background: linear-gradient(
+      45deg,
+      rgba($color: var(--v-theme-background), $alpha: 0.1) 0%,
+      rgba($color: var(--v-theme-background), $alpha: 0.1) 100%
+    ),
+    url("../assets/pexels-leon-ardho-1552252.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+//Button favorite when is favorite style
+.is_favorite {
+  //Color
+  color: #d22809;
+}
+
+//Button favorite when is not favorite style
+.is_not_favorite {
+  //Color
+  color: #831906;
+}
+
+//Delete button style
+.delete_button {
+  margin-top: 10px;
+
+  width: fit-content;
+}
+
+//Play routine button styles
+.play_button {
+  color: #2d9f2d!important;
+}
+
+.play_button:hover {
+  color: #48ff48!important;
+}
+
+.prepare-view-section i{
+  font-size: 30px !important;
+}
+
+.action_button {
+  color: rgb(var(--v-theme-card));
+}
+
+//Slide group style
+.v-slide-group__content {
+  gap: 10px !important;
+}
+
+//Skeleton loader style
+.v-skeleton-loader{
+  width: 100%;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+//Input with its value centered
+.centered-input input {
+  text-align: center;
+}
+
+//Input with its font size in 30px
+.input-font input {
+  font-size: 30px !important;
+}
+
+//Input in set card styles
+.set_input .v-field__field,
+.set_input input,
+.set_input .v-field__input {
+  //Sizing, spacing and margin
+  width: 40px !important;
+
+  height: 40px !important;
+
+  min-width: 40px !important;
+
+  padding: 0;
+
+  margin: 0;
+
+  //Display
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  //Font
+  font-size: 12px;
+}
+
