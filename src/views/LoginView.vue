@@ -2,12 +2,7 @@
   <section class="login_section">
     <v-form
       ref="form"
-      @submit.prevent="
-        async () => {
-          const { valid } = await this.$refs.form.validate();
-          if (valid) login(login_form);
-        }
-      "
+      @submit.prevent="login(login_form)"
       :class="error ? 'login_form_with_error' : 'login_form_without_error'"
     >
       <!-- Error component -->
@@ -38,8 +33,11 @@
         >Forgot password?</router-link
       >
       <div class="login_buttons d-flex flex-column">
-        <ButtonComponent button-label="Sign in" button_type="submit" 
-        button-prepend-icon="fa-solid fa-right-to-bracket"/>
+        <ButtonComponent
+          button-label="Sign in"
+          button_type="submit"
+          button-prepend-icon="fa-solid fa-right-to-bracket"
+        />
         <ButtonComponent
           button-label="Sign in with google"
           button_type="text"
@@ -72,6 +70,8 @@ import ErrorComponent from "@/components/ErrorComponent.vue";
 import SnackbarComponent from "@/components/SnackbarComponent.vue";
 
 //Variables
+const form = ref(null);
+
 const login_form = ref({
   email: null,
   password: null,
@@ -87,14 +87,20 @@ const open_snackbar = ref(false);
 
 /*Function that allows to login*/
 async function login(data_form) {
-  try {
-    const result = await user_store.login(data_form);
+  const { valid } = form.value.validate();
+  if (valid) {
+    try {
+      const result = await user_store.login(data_form);
 
-    localStorage.setItem("current_user_info", JSON.stringify(result.resource));
+      localStorage.setItem(
+        "current_user_info",
+        JSON.stringify(result.resource)
+      );
 
-    router.push({ name: "Dashboard" });
-  } catch (err) {
-    error.value = err.response.data.resource.message;
+      router.push({ name: "Dashboard" });
+    } catch (err) {
+      error.value = err.response.data.resource.message;
+    }
   }
 }
 
@@ -103,7 +109,7 @@ async function login(data_form) {
 /*Lifehook in charge of managing a not logged user error */
 onMounted(() => {
   open_snackbar.value = user_store.not_logged_user_error;
-  
+
   user_store.not_logged_user_error = false;
 });
 </script>
