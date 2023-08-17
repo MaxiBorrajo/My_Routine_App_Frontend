@@ -87,7 +87,7 @@ const open_snackbar = ref(false);
 
 /*Function that allows to login*/
 async function login(data_form) {
-  const { valid } = form.value.validate();
+  const { valid } = await form.value.validate();
   if (valid) {
     try {
       const result = await user_store.login(data_form);
