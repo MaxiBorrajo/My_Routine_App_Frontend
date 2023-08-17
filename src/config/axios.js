@@ -3,7 +3,7 @@ import axios from "axios";
 
 //Variables
 const instance = axios.create({
-  baseURL: "http://localhost:3000/v1",
+  baseURL: `${import.meta.env.VITE_URL_SERVICE}/v1`,
   withCredentials: true
 });
 
