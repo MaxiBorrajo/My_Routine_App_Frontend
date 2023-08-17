@@ -18,6 +18,7 @@ import VueCookies from "vue-cookies";
 
 //Variables
 const router = createRouter({
+  mode: "history",
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
@@ -128,7 +129,6 @@ const router = createRouter({
 
 //Guards
 router.beforeEach(async (to, from, next) => {
-
   const require_auth = to.meta.require_auth;
 
   const user_store = useUserStore();
