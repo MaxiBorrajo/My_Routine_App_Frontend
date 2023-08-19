@@ -27,8 +27,8 @@ const router = createRouter({
       component: HomeView,
       beforeEnter: (to, from, next) => {
         if (
-          VueCookies.isKey("is_logged_in") &&
-          VueCookies.get("is_logged_in")
+          VueCookies.isKey("_is_logged_in") &&
+          VueCookies.get("_is_logged_in")
         ) {
           next({ name: "Dashboard" });
         } else {
@@ -133,10 +133,10 @@ router.beforeEach(async (to, from, next) => {
 
   const user_store = useUserStore();
   if (
-    (require_auth && !VueCookies.isKey("is_logged_in")) ||
+    (require_auth && !VueCookies.isKey("_is_logged_in")) ||
     (require_auth &&
-      VueCookies.isKey("is_logged_in") &&
-      !VueCookies.get("is_logged_in"))
+      VueCookies.isKey("_is_logged_in") &&
+      !VueCookies.get("_is_logged_in"))
   ) {
     next({ name: "Home" });
 
