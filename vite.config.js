@@ -23,7 +23,7 @@ export default defineConfig({
   },
   server:{
     proxy:{
-      '/v1':'https://my-routine-app-backend.vercel.app/'
+      '/v1':'https://my-routine-app-backend.vercel.app'
     }
   }
 });
