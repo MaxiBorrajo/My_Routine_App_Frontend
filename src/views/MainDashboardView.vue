@@ -67,6 +67,7 @@ import { useExerciseStore } from "../stores/exercise_store";
 import RoutinesView from "@/views/RoutinesView.vue";
 import ExercisesView from "@/views/ExercisesView.vue";
 import LoaderComponent from "@/components/LoaderComponent.vue";
+import VueCookies from "vue-cookies";
 
 //Variables
 const user_store = useUserStore();
@@ -127,7 +128,9 @@ async function sign_out() {
 
     localStorage.clear();
 
-    router.push({ name: "Home" })
+    VueCookies.remove("_is_logged_in");
+
+    router.push({ name: "Home" });
   } catch (err) {
     error.value = err.response.data.resource.message;
   }

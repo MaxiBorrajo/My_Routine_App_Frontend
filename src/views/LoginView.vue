@@ -68,6 +68,7 @@ import ButtonComponent from "@/components/ButtonComponent.vue";
 import InputComponent from "@/components/InputComponent.vue";
 import ErrorComponent from "@/components/ErrorComponent.vue";
 import SnackbarComponent from "@/components/SnackbarComponent.vue";
+import VueCookies from "vue-cookies";
 
 //Variables
 const form = ref(null);
@@ -98,6 +99,8 @@ async function login(data_form) {
         "current_user_info",
         JSON.stringify(result.resource)
       );
+
+      VueCookies.set('_is_logged_in', true)
 
       router.push({ name: "Dashboard" });
     } catch (err) {

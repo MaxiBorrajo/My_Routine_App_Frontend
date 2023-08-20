@@ -80,6 +80,7 @@ import { useUserStore } from "../stores/user_store";
 import ButtonComponent from "@/components/ButtonComponent.vue";
 import InputComponent from "@/components/InputComponent.vue";
 import ErrorComponent from "@/components/ErrorComponent.vue";
+import VueCookies from "vue-cookies";
 
 //Variables
 const register_form = ref({
@@ -103,6 +104,8 @@ async function register(data_form) {
     const result = await user_store.register(data_form);
 
     localStorage.setItem("current_user_info", JSON.stringify(result.resource));
+
+    VueCookies.set('_is_logged_in', true)
 
     router.push({ name: "Profile" });
   } catch (err) {
