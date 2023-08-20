@@ -1,12 +1,8 @@
 <template>
   <section class="reset_password_section d-flex justify-center align-center">
     <!-- Reset password view -->
-    <v-card
-      color="card"
-      rounded="0"
-      class="d-flex flex-column justify-center"
-    >
-    <!-- Reset password view title -->
+    <v-card color="card" rounded="0" class="d-flex flex-column justify-center">
+      <!-- Reset password view title -->
       <v-card-title class="text-center">
         <h1>Change password</h1>
       </v-card-title>
@@ -21,12 +17,7 @@
       <v-card-text>
         <v-form
           ref="form"
-          @submit.prevent="
-            async () => {
-              const { valid } = await this.$refs.form.validate();
-              if (valid) reset_password(reset_password_form);
-            }
-          "
+          @submit.prevent="reset_password(reset_password_form)"
           class="d-flex flex-column"
         >
           <p v-if="error" class="error">{{ error }}</p>
@@ -90,19 +81,28 @@ const user_store = useUserStore();
 
 const error = ref(null);
 
+const form = ref(null);
+
 const open_snackbar = ref(false);
 
 const show_password = ref(false);
 
 /*Function that changes the user's password with the new one*/
 async function reset_password(data_form) {
-  open_snackbar.value = false;
-  
-  const result = await user_store.reset_password(route.params.token, data_form);
-  if (result.success) {
-    open_snackbar.value = true;
-  } else {
-    error.value = result.resource.message;
+  const { valid } = await form.value.validate();
+
+  if (valid) {
+    open_snackbar.value = false;
+
+    const result = await user_store.reset_password(
+      route.params.token,
+      data_form
+    );
+    if (result.success) {
+      open_snackbar.value = true;
+    } else {
+      error.value = result.resource.message;
+    }
   }
 }
 </script>
@@ -177,10 +177,9 @@ async function reset_password(data_form) {
     .v-card {
       //Sizing and spacing
       height: 100%;
-      
+
       padding: 70px 15px;
     }
   }
 }
-
 </style>

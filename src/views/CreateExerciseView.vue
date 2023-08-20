@@ -10,12 +10,7 @@
     <!-- Create exercise section form -->
     <v-form
       ref="form"
-      @submit.prevent="
-        async () => {
-          const { valid } = await this.$refs.form.validate();
-          if (valid) create_exercise();
-        }
-      "
+      @submit.prevent="create_exercise()"
       class="exercise-section__form d-flex flex-column"
     >
       <!-- Exercise name input -->
@@ -43,11 +38,7 @@
           input_label="Description"
           v-if="data_is_loaded"
         />
-        <v-skeleton-loader
-          type="image"
-          color="card"
-          v-else
-        ></v-skeleton-loader>
+        <v-skeleton-loader type="image" color="card" v-else></v-skeleton-loader>
       </div>
       <!-- Error component -->
       <ErrorComponent v-if="error" :error_component_message="error" />
@@ -152,11 +143,7 @@
           @change="on_photo_change"
         />
       </div>
-      <v-skeleton-loader
-        type="image"
-        color="card"
-        v-else
-      ></v-skeleton-loader>
+      <v-skeleton-loader type="image" color="card" v-else></v-skeleton-loader>
       <!-- Rest time -->
       <div
         class="exercise-section__form__rest-time d-flex flex-column"
@@ -374,6 +361,8 @@ const set_store = useSetStore();
 
 const error = ref(null);
 
+const form = ref(null);
+
 const data_is_loaded = ref(false);
 
 const show_loader = ref(false);
@@ -423,28 +412,32 @@ const snackbar_text = ref("");
 
 /*Function that updates the current exercise*/
 async function create_exercise() {
-  try {
-    show_loader.value = true;
+  const { valid } = await form.value.validate();
 
-    new_exercise.value.time_after_exercise = `${rest_time.value.minutes} minutes ${rest_time.value.seconds} seconds`;
+  if (valid) {
+    try {
+      show_loader.value = true;
 
-    await exercise_store.create_new_exercise(new_exercise.value);
+      new_exercise.value.time_after_exercise = `${rest_time.value.minutes} minutes ${rest_time.value.seconds} seconds`;
 
-    const last_id = await exercise_store.find_last_id_exercise();
+      await exercise_store.create_new_exercise(new_exercise.value);
 
-    await create_sets(last_id.resource);
+      const last_id = await exercise_store.find_last_id_exercise();
 
-    await assign_muscle_groups(last_id.resource);
+      await create_sets(last_id.resource);
 
-    upload_photos(last_id.resource);
+      await assign_muscle_groups(last_id.resource);
 
-    show_loader.value = false;
+      upload_photos(last_id.resource);
 
-    router.push({ name: "Home" });
-  } catch (err) {
-    error.value = err.response.data.resource.message;
+      show_loader.value = false;
 
-    show_loader.value = false;
+      router.push({ name: "Home" });
+    } catch (err) {
+      error.value = err.response.data.resource.message;
+
+      show_loader.value = false;
+    }
   }
 }
 

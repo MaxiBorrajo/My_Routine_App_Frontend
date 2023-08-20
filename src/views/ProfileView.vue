@@ -11,12 +11,7 @@
       <!-- Profile section form -->
       <v-form
         ref="form"
-        @submit.prevent="
-          async () => {
-            const { valid } = await this.$refs.form.validate();
-            if (valid) update_profile();
-          }
-        "
+        @submit.prevent="update_profile()"
         class="profile-section__main-content__form"
       >
         <!-- First part -->
@@ -28,11 +23,7 @@
           <v-avatar
             @mouseover="show_indicator = true"
             @mouseleave="show_indicator = false"
-            @click="
-              () => {
-                this.$refs.file_input.click();
-              }
-            "
+            @click="file_input.click()"
             size="200"
             class="profile-section__main-content__form__first-part__profile-photo"
           >
@@ -272,6 +263,10 @@ const user_store = useUserStore();
 
 const error = ref(null);
 
+const form = ref(null);
+
+const file_input = ref(null);
+
 const profile_photo = ref("");
 
 const open_snackbar = ref(false);
@@ -299,32 +294,36 @@ function on_photo_profile_change(event) {
 
 /*Function that updates the current user's information*/
 async function update_profile() {
-  try {
-    data_is_loaded.value = false;
+  const { valid } = await form.value.validate();
 
-    open_snackbar.value = false;
+  if (valid) {
+    try {
+      data_is_loaded.value = false;
 
-    Object.entries(user_info.value).forEach(([key, value]) => {
-      new_user_info.value.append(key, value);
-    });
+      open_snackbar.value = false;
 
-    new_user_info.value.delete("url_profile_photo");
+      Object.entries(user_info.value).forEach(([key, value]) => {
+        new_user_info.value.append(key, value);
+      });
 
-    new_user_info.value.delete("public_id_profile_photo");
+      new_user_info.value.delete("url_profile_photo");
 
-    await user_store.update_current_user(new_user_info.value);
+      new_user_info.value.delete("public_id_profile_photo");
 
-    localStorage.clear();
-    
-    new_user_info.value = new FormData();
+      await user_store.update_current_user(new_user_info.value);
 
-    data_is_loaded.value = true;
+      localStorage.clear();
 
-    open_snackbar.value = true;
-  } catch (err) {
-    error.value = err.response.data.resource.message;
+      new_user_info.value = new FormData();
 
-    data_is_loaded.value = true;
+      data_is_loaded.value = true;
+
+      open_snackbar.value = true;
+    } catch (err) {
+      error.value = err.response.data.resource.message;
+
+      data_is_loaded.value = true;
+    }
   }
 }
 

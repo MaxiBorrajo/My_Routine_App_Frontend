@@ -3,11 +3,7 @@
     <!-- Back button -->
     <BackButtonComponent />
     <!-- Main section -->
-    <v-card
-      color="card"
-      rounded="0"
-      class="d-flex flex-column justify-center"
-    >
+    <v-card color="card" rounded="0" class="d-flex flex-column justify-center">
       <!-- Main section title -->
       <v-card-title class="text-center">
         <h1>Feedback</h1>
@@ -22,12 +18,7 @@
       <v-card-text>
         <v-form
           ref="form"
-          @submit.prevent="
-            async () => {
-              const { valid } = await this.$refs.form.validate();
-              if (valid) send_feedback(feedback_form);
-            }
-          "
+          @submit.prevent="send_feedback(feedback_form)"
           class="d-flex flex-column"
         >
           <!-- Error component -->
@@ -65,6 +56,8 @@ import SnackbarComponent from "@/components/SnackbarComponent.vue";
 import BackButtonComponent from "@/components/BackButtonComponent.vue";
 
 //Variables
+const form = ref(null);
+
 const feedback_form = ref({
   comment: null,
 });
@@ -79,13 +72,16 @@ const open_snackbar = ref(false);
 
 /*Function that sends the feedback of the user */
 async function send_feedback(data_form) {
+  const { valid } = await form.value.validate();
+  
+  if (valid) {
   open_snackbar.value = false;
   const result = await user_store.send_feedback(data_form);
   if (result.success) {
     open_snackbar.value = true;
   } else {
     error.value = result.resource.message;
-  }
+  }}
 }
 </script>
 
@@ -96,7 +92,7 @@ async function send_feedback(data_form) {
   position: relative;
 
   //Sizing
-  min-height:100vh;
+  min-height: 100vh;
   height: auto;
   width: 100%;
   //Main section styles

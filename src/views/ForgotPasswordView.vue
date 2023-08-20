@@ -3,11 +3,7 @@
     <!-- Back button -->
     <BackButtonComponent />
 
-    <v-card
-      color="card"
-      rounded="0"
-      class="d-flex flex-column justify-center"
-    >
+    <v-card color="card" rounded="0" class="d-flex flex-column justify-center">
       <!-- Forgot password section title -->
       <v-card-title class="text-center">
         <h1>Forgot password</h1>
@@ -21,12 +17,7 @@
       <v-card-text>
         <v-form
           ref="form"
-          @submit.prevent="
-            async () => {
-              const { valid } = await this.$refs.form.validate();
-              if (valid) forgot_password(forgot_password_form);
-            }
-          "
+          @submit.prevent="forgot_password(forgot_password_form)"
           class="d-flex flex-column"
         >
           <p v-if="error" class="error">{{ error }}</p>
@@ -70,20 +61,26 @@ const user_store = useUserStore();
 
 const error = ref(null);
 
+const form = ref(null);
+
 const open_snackbar = ref(false);
 
 //Methods
 
 /*Function that sends an change password email to the one given by the user*/
 async function forgot_password(data_form) {
-  open_snackbar.value = false;
+  const { valid } = await form.value.validate();
 
-  const result = await user_store.forgot_password(data_form);
+  if (valid) {
+    open_snackbar.value = false;
 
-  if (result.success) {
-    open_snackbar.value = true;
-  } else {
-    error.value = result.resource.message;
+    const result = await user_store.forgot_password(data_form);
+
+    if (result.success) {
+      open_snackbar.value = true;
+    } else {
+      error.value = result.resource.message;
+    }
   }
 }
 </script>

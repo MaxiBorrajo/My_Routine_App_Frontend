@@ -2,12 +2,7 @@
   <section class="register_section">
     <v-form
       ref="form"
-      @submit.prevent="
-        async () => {
-          const { valid } = await this.$refs.form.validate();
-          if (valid) register(register_form);
-        }
-      "
+      @submit.prevent="register(register_form)"
       :class="
         error ? 'register_form_with_error' : 'register_form_without_error'
       "
@@ -83,6 +78,8 @@ import ErrorComponent from "@/components/ErrorComponent.vue";
 import VueCookies from "vue-cookies";
 
 //Variables
+const form = ref(null);
+
 const register_form = ref({
   name: null,
   last_name: null,
@@ -100,16 +97,23 @@ const error = ref(null);
 
 /*Function that allows user to create a new account */
 async function register(data_form) {
-  try {
-    const result = await user_store.register(data_form);
+  const { valid } = await form.value.validate();
+  
+  if (valid) {
+    try {
+      const result = await user_store.register(data_form);
 
-    localStorage.setItem("current_user_info", JSON.stringify(result.resource));
+      localStorage.setItem(
+        "current_user_info",
+        JSON.stringify(result.resource)
+      );
 
-    VueCookies.set('_is_logged_in', true)
+      VueCookies.set("_is_logged_in", true);
 
-    router.push({ name: "Profile" });
-  } catch (err) {
-    error.value = err.response.data.resource.message;
+      router.push({ name: "Profile" });
+    } catch (err) {
+      error.value = err.response.data.resource.message;
+    }
   }
 }
 </script>

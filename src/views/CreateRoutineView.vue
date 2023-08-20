@@ -9,15 +9,7 @@
     <BackButtonComponent />
     <!-- Routine section first part -->
     <h2>Create new routine</h2>
-    <v-form
-      ref="form"
-      @submit.prevent="
-        async () => {
-          const { valid } = await this.$refs.form.validate();
-          if (valid) create_routine();
-        }
-      "
-    >
+    <v-form ref="form" @submit.prevent="create_routine()">
       <div
         class="routine-section__first-part d-flex flex-column"
         v-if="data_is_loaded"
@@ -300,6 +292,8 @@ const routine_store = useRoutineStore();
 
 const data_is_loaded = ref(false);
 
+const form = ref(null);
+
 const new_routine = ref({
   routine_name: "",
   time_before_start: "",
@@ -381,24 +375,28 @@ async function assign_exercises() {
  * Function that creates a routine
  */
 async function create_routine() {
-  try {
-    show_loader.value = true;
+  const { valid } = await form.value.validate();
 
-    new_routine.value.time_before_start = `${preparation_time.value.minutes} minutes ${preparation_time.value.seconds} seconds`;
+  if (valid) {
+    try {
+      show_loader.value = true;
 
-    await routine_store.create_new_routine(new_routine.value);
+      new_routine.value.time_before_start = `${preparation_time.value.minutes} minutes ${preparation_time.value.seconds} seconds`;
 
-    await assign_days();
+      await routine_store.create_new_routine(new_routine.value);
 
-    await assign_exercises();
+      await assign_days();
 
-    exercise_store.selected_exercises = [];
+      await assign_exercises();
 
-    show_loader.value = false;
+      exercise_store.selected_exercises = [];
 
-    router.push({ name: "Home" });
-  } catch (err) {
-    error.value = err.response.data.resource.message;
+      show_loader.value = false;
+
+      router.push({ name: "Home" });
+    } catch (err) {
+      error.value = err.response.data.resource.message;
+    }
   }
 }
 
