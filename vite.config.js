@@ -21,4 +21,9 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
+  server:{
+    proxy:{
+      '/v1':'https://my-routine-app-backend.vercel.app/'
+    }
+  }
 });
