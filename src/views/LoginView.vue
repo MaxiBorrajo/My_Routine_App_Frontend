@@ -91,6 +91,8 @@ async function login(data_form) {
   const { valid } = await form.value.validate();
   if (valid) {
     try {
+      await user_store.logout();
+
       const result = await user_store.login(data_form);
 
       localStorage.setItem(
