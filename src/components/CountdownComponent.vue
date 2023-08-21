@@ -106,7 +106,7 @@ const countdown_fixed = computed(() => {
   return time;
 });
 
-const countdown_sound = new Audio("https://my-routine-app-frontend.vercel.app/assets/race-start-beeps-125125.mp3");
+const countdown_sound = new Audio("src/assets/race-start-beeps-125125.mp3");
 
 const is_paused = ref(false);
 
