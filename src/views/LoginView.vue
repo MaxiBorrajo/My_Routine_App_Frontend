@@ -91,8 +91,6 @@ async function login(data_form) {
   const { valid } = await form.value.validate();
   if (valid) {
     try {
-      await user_store.logout();
-      
       const result = await user_store.login(data_form);
 
       localStorage.setItem(
@@ -100,7 +98,7 @@ async function login(data_form) {
         JSON.stringify(result.resource)
       );
 
-      VueCookies.set('_is_logged_in', true)
+      VueCookies.set("_is_logged_in", true);
 
       router.push({ name: "Dashboard" });
     } catch (err) {
