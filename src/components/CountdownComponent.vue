@@ -70,7 +70,7 @@ import { ref, computed, onBeforeMount, onMounted } from "vue";
 import ProgressCircularComponent from "@/components/ProgressCircularComponent.vue";
 import router from "../router/index";
 import { useUserStore } from "../stores/user_store";
-
+import audio from "../assets/race-start-beeps-125125.mp3";
 //Variables
 const props = defineProps({
   countdown: Object,
@@ -106,7 +106,7 @@ const countdown_fixed = computed(() => {
   return time;
 });
 
-const countdown_sound = new Audio("/assets/race-start-beeps-125125.mp3");
+const countdown_sound = new Audio(audio);
 
 const is_paused = ref(false);
 
