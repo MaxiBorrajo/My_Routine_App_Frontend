@@ -9,7 +9,7 @@
     >
       <!-- Repetition set view title -->
       <h2 class="text-uppercase set">{{ exercise_name }}</h2>
-      <h2 class="text-uppercase set">{{ current_set.set_order }} SET</h2>
+      <h2 class="text-uppercase set">{{ current_set.set_order }} SET {{ current_set.weight }} {{ weight_unit }}</h2>
       <h2 class="text-uppercase set">
         {{ current_set.repetition }} Repetitions
       </h2>
@@ -50,7 +50,7 @@
 
 <script setup>
 //Imports
-import { ref, onBeforeMount } from "vue";
+import { ref, onBeforeMount,computed } from "vue";
 import router from "../router/index";
 
 //Variables
@@ -62,6 +62,10 @@ const props = defineProps({
 const emit = defineEmits(["set_finished"]);
 
 const data_is_loaded = ref(false);
+
+const weight_unit = computed(()=>{
+  return JSON.parse(localStorage.getItem("current_user_info")).weight
+})
 
 //Methods
 /*Function that emit an event indicating that the set has finished */

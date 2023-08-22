@@ -268,7 +268,7 @@ onBeforeMount(async () => {
 //Exercise card's style
 .v-card {
   //Color
-  color: rgb(var(--v-theme-text))!important;
+  color: rgb(var(--v-theme-text)) !important;
 
   //Size
   width: 100%;
@@ -375,7 +375,8 @@ onBeforeMount(async () => {
 //Media queries
 @media only screen and (min-width: 480px) {
   //Exercise card style
-  .v-card, .v-skeleton-loader {
+  .v-card,
+  .v-skeleton-loader {
     //Size
     max-width: 480px;
   }

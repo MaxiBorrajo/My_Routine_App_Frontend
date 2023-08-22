@@ -9,7 +9,7 @@
       class="d-flex align-center justify-center flex-column time-set-view-section__title"
     >
       <h2 class="text-uppercase set">{{ exercise_name }}</h2>
-      <h2 class="text-uppercase">{{ current_set.set_order }} set</h2>
+      <h2 class="text-uppercase">{{ current_set.set_order }} set {{ current_set.weight }} {{ weight_unit }}</h2>
     </div>
     <!-- Time set view section countdown -->
     <CountdownComponent
@@ -21,7 +21,7 @@
 
 <script setup>
 //Imports
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount, ref, computed } from "vue";
 import CountdownComponent from "../components/CountdownComponent.vue";
 
 //Variables
@@ -33,6 +33,11 @@ const props = defineProps({
 const emit = defineEmits(["set_finished"]);
 
 const data_is_loaded = ref(false);
+
+const weight_unit = computed(()=>{
+  return JSON.parse(localStorage.getItem("current_user_info")).weight
+})
+
 
 //Methods
 /*Function that emits an event that indicates that the set has finished*/

@@ -138,7 +138,7 @@
 
 <script setup>
 //Imports
-import { ref, onBeforeMount } from "vue";
+import { ref, onBeforeMount, watch } from "vue";
 import { useDayStore } from "../stores/day_store";
 import { useRoutineStore } from "../stores/routine_store";
 import ButtonComponent from "@/components/ButtonComponent.vue";

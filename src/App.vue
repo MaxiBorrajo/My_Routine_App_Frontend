@@ -4,9 +4,7 @@
     <div class="main_content d-flex justify-center">
       <router-view v-slot="{ Component }">
         <Transition name="bounce" mode="out-in" appear>
-          <keep-alive
-            include="CreateRoutineView, CreateExerciseView, ChooseExerciseView"
-          >
+          <keep-alive>
             <component :is="Component"></component>
           </keep-alive>
         </Transition>
