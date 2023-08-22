@@ -275,6 +275,17 @@ function clear_all_filter_and_sorting() {
   applied_filters_and_sorting();
 }
 
+//Watchers
+/*Watcher that reset the selected order if sees a change in the selected sort by */
+watch(selected_sort_by, () => {
+  select_order.value = null;
+});
+
+/*Watcher that reset the selected filter values if sees a change in the selected filter */
+watch(selected_filter, () => {
+  selected_filter_values.value = [];
+});
+
 /*Lifehooks*/
 
 /*Lifehook in charge of obtaining certain data 
