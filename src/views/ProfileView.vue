@@ -257,8 +257,6 @@ const data_is_loaded = ref(false);
 
 const new_user_info = ref(new FormData());
 
-const theme = useTheme();
-
 const user_store = useUserStore();
 
 const error = ref(null);

@@ -152,11 +152,7 @@
               <v-icon
                 icon="fa-solid fa-plus"
                 v-bind="props"
-                @click="
-                  () => {
-                    this.$refs.file_input.click();
-                  }
-                "
+                @click="file_input.click()"
               ></v-icon>
             </template>
           </v-tooltip>
@@ -447,7 +443,12 @@
         :snackbar_text="snackbar_text"
       />
       <!-- Dialog component -->
-      <v-dialog v-model="dialog.show_dialog" persistent width="auto" scroll-strategy="none">
+      <v-dialog
+        v-model="dialog.show_dialog"
+        persistent
+        width="auto"
+        scroll-strategy="none"
+      >
         <DialogComponent
           :dialog_title="dialog.dialog_title"
           :dialog_text="dialog.dialog_text"
@@ -505,6 +506,8 @@ const set_store = useSetStore();
 const error = ref(null);
 
 const data_is_loaded = ref(false);
+
+const file_input = ref(null);
 
 const exercise_info = ref(null);
 
@@ -577,10 +580,12 @@ function fix_rest_time() {
   rest_time.value.seconds = parseInt(rest_time.value.seconds);
 
   rest_time.value.minutes = parseInt(rest_time.value.minutes);
-  
-  rest_time.value.seconds = rest_time.value.seconds > 59 ? 59 : rest_time.value.seconds
 
-  rest_time.value.minutes = rest_time.value.minutes > 99 ? 99 : rest_time.value.minutes
+  rest_time.value.seconds =
+    rest_time.value.seconds > 59 ? 59 : rest_time.value.seconds;
+
+  rest_time.value.minutes =
+    rest_time.value.minutes > 99 ? 99 : rest_time.value.minutes;
 }
 
 /*Function that changes favorite state of the exercise */
@@ -1088,24 +1093,23 @@ p {
     //Width
     width: 100%;
     max-width: 768px;
-    
   }
 }
 
 //Media queries
 @media only screen and (min-width: 768px) {
-      //Exercise section styles
-      .exercise-section {
-        &__create-buttons {
-          //Sizing
-          width: 100%;
+  //Exercise section styles
+  .exercise-section {
+    &__create-buttons {
+      //Sizing
+      width: 100%;
 
-          //Display
-          gap: 10px;
-          flex-direction: row;
-          align-items: center;
-          justify-content: center;
-        }
-      }
+      //Display
+      gap: 10px;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
     }
+  }
+}
 </style>

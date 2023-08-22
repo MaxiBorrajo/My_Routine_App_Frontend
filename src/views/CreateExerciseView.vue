@@ -93,7 +93,7 @@
               <v-icon
                 icon="fa-solid fa-plus"
                 v-bind="props"
-                @click="this.$refs.file_input.click()"
+                @click="file_input.click()"
               ></v-icon>
             </template>
           </v-tooltip>
@@ -362,6 +362,8 @@ const set_store = useSetStore();
 const error = ref(null);
 
 const form = ref(null);
+
+const file_input = ref(null);
 
 const data_is_loaded = ref(false);
 
