@@ -54,6 +54,13 @@ body {
   color: rgb(var(--v-theme-card));
 }
 
+//Clarification style
+.clarification{
+  //Font
+  font-size: 14px;
+  font-weight: 300;
+}
+
 //Slide group style
 .v-slide-group__content {
   gap: 10px !important;

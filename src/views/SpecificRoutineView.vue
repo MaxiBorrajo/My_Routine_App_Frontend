@@ -8,7 +8,7 @@
     <!-- Routine section first part -->
     <div
       class="routine-section__first-part d-flex flex-column"
-      v-if="data_is_loaded"
+      v-if="routine_info && days_of_routine"
     >
       <!-- Routine name -->
       <span
@@ -64,7 +64,7 @@
     <!-- Routine section description -->
     <div
       class="routine-section__description d-flex flex-column"
-      v-if="data_is_loaded"
+      v-if="routine_info"
     >
       <span class="d-flex align-center routine-section__description__title"
         ><p>Description</p>
@@ -107,12 +107,12 @@
     <!-- Routine section days selected -->
     <div
       class="routine-section__days-selected d-flex flex-column"
-      v-if="data_is_loaded"
+      v-if="days_available"
     >
       <p>Assigned days</p>
       <div class="d-flex justify-center">
         <v-slide-group show-arrows>
-          <v-slide-group-item v-for="day in days_available">
+          <v-slide-group-item v-for="day in days_available" :key="day.id_day">
             <v-chip
               label
               :color="is_a_selected_day(day) ? 'attention' : 'soft_attention'"
@@ -131,7 +131,7 @@
     <!-- Routine section preparation time -->
     <div
       class="routine-section__preparation-time d-flex flex-column"
-      v-if="data_is_loaded"
+      v-if="preparation_time"
     >
       <p>Preparation time</p>
       <div class="d-flex justify-center">
@@ -185,7 +185,7 @@
     <!-- Routine section exercises -->
     <div
       class="routine-section__exercises d-flex flex-column"
-      v-if="data_is_loaded"
+      v-if="exercises_of_routine"
     >
       <!-- Routine section exercises title and options -->
       <span class="d-flex align-center routine-section__description__title"
@@ -304,7 +304,7 @@
     </div>
     <v-divider></v-divider>
     <!-- Routine section delete button -->
-    <div class="d-flex justify-start" v-if="data_is_loaded">
+    <div class="d-flex justify-start" v-if="routine_info">
       <ButtonComponent
         button-type="text"
         button-prepend-icon="fa-solid fa-trash-can"
@@ -327,7 +327,7 @@
     </div>
     <!-- Routine section favorite button -->
     <v-tooltip
-      v-if="data_is_loaded"
+      v-if="routine_info"
       :text="
         routine_info.is_favorite ? 'Set to not favorite' : 'Set to favorite'
       "
@@ -354,14 +354,7 @@
           class="play_button"
           icon="fa-solid fa-play"
           v-bind="props"
-          @click="
-            router.push({
-              name: 'PlayRoutine',
-              params: {
-                id_routine: route.params.id_routine,
-              },
-            })
-          "
+          @click="play_routine"
         ></v-icon>
       </template>
     </v-tooltip>
@@ -423,8 +416,6 @@ const day_store = useDayStore();
 const exercise_store = useExerciseStore();
 
 const routine_store = useRoutineStore();
-
-const data_is_loaded = ref(false);
 
 const routine_info = ref(null);
 
@@ -540,9 +531,9 @@ async function change_day(day) {
       await day_store.assign_day_to_routine(data);
     }
 
-    const days = await day_store.find_days_of_routine(route.params.id_routine);
-
-    days_of_routine.value = days.resource;
+    days_of_routine.value = [
+      ...(await day_store.find_days_of_routine(route.params.id_routine)),
+    ];
   } catch (err) {
     error.value = err.response.data.resource.message;
   }
@@ -551,12 +542,12 @@ async function change_day(day) {
 /**
  * Function that updates the routine
  */
-async function update_routine() {
+function update_routine() {
   if (routine_info.value.routine_name) {
     try {
       routine_info.value.time_before_start = `${preparation_time.value.minutes} minutes ${preparation_time.value.seconds} seconds`;
 
-      await routine_store.update_specific_routine(
+      routine_store.update_specific_routine(
         route.params.id_routine,
         routine_info.value
       );
@@ -595,7 +586,7 @@ function fix_preparation_time() {
 async function change_favorite() {
   routine_info.value.is_favorite = !routine_info.value.is_favorite;
 
-  await update_routine();
+  update_routine();
 }
 
 /**
@@ -623,20 +614,20 @@ async function delete_all_selected_exercises() {
       dialog.value.show_dialog = false;
 
       selected_exercises.value.forEach(async (id_exercise) => {
-        await exercise_store.delete_specific_exercise(id_exercise);
+        let result = await exercise_store.delete_specific_exercise(id_exercise);
+
+        if (result) {
+          exercises_of_routine.value = [
+            ...(await exercise_store.find_exercises_of_routine(
+              route.params.id_routine
+            )),
+          ];
+        }
       });
 
-      setTimeout(async () => {
-        const exercises = await exercise_store.find_exercises_of_routine(
-          route.params.id_routine
-        );
+      snackbar_text.value = "Exercises deleted successfully";
 
-        exercises_of_routine.value = exercises.resource;
-
-        snackbar_text.value = "Exercises deleted successfully";
-
-        open_snackbar.value = true;
-      }, 1000);
+      open_snackbar.value = true;
     } catch (err) {
       error.value = err.response.data.resource.message;
     }
@@ -658,23 +649,23 @@ async function remove_all_selected_exercises() {
       dialog.value.show_dialog = false;
 
       selected_exercises.value.forEach(async (id_exercise) => {
-        await routine_store.remove_exercise_from_routine(
+        let result = await routine_store.remove_exercise_from_routine(
           id_exercise,
           route.params.id_routine
         );
+
+        if (result) {
+          exercises_of_routine.value = [
+            ...(await exercise_store.find_exercises_of_routine(
+              route.params.id_routine
+            )),
+          ];
+        }
       });
 
-      setTimeout(async () => {
-        const exercises = await exercise_store.find_exercises_of_routine(
-          route.params.id_routine
-        );
+      snackbar_text.value = "Exercises removed successfully";
 
-        exercises_of_routine.value = exercises.resource;
-
-        snackbar_text.value = "Exercises removed successfully";
-
-        open_snackbar.value = true;
-      }, 1000);
+      open_snackbar.value = true;
     } catch (err) {
       error.value = err.response.data.resource.message;
     }
@@ -694,7 +685,7 @@ async function add_all_added_exercises(exercises) {
       open_snackbar.value = false;
 
       exercises.forEach(async (exercise) => {
-        await routine_store.add_exercise_to_routine(
+        let result = await routine_store.add_exercise_to_routine(
           exercise.id_exercise,
           route.params.id_routine,
           {
@@ -703,21 +694,21 @@ async function add_all_added_exercises(exercises) {
         );
 
         await change_exercise_order();
+
+        if (result) {
+          exercises_of_routine.value = [
+            ...(await exercise_store.find_exercises_of_routine(
+              route.params.id_routine
+            )),
+          ];
+        }
       });
 
-      setTimeout(async () => {
-        exercise_store.selected_exercises = [];
+      exercise_store.selected_exercises = [];
 
-        const exercises = await exercise_store.find_exercises_of_routine(
-          route.params.id_routine
-        );
+      snackbar_text.value = "Exercises added successfully";
 
-        exercises_of_routine.value = exercises.resource;
-
-        snackbar_text.value = "Exercises added successfully";
-
-        open_snackbar.value = true;
-      }, 1000);
+      open_snackbar.value = true;
     } catch (err) {
       error.value = err.response.data.resource.message;
 
@@ -767,39 +758,45 @@ async function change_exercise_order() {
   }
 }
 
+/*Function that handles play of a routine*/
+function play_routine() {
+  if (exercises_of_routine.value.length > 0) {
+    router.push({
+      name: "PlayRoutine",
+      params: {
+        id_routine: route.params.id_routine,
+      },
+    });
+  }
+}
+
 /*Lifehooks*/
 /*Gets certain routine's data before view is mounted*/
 onBeforeMount(async () => {
   try {
-    const specific_routine = await routine_store.find_specific_routine(
-      route.params.id_routine
-    );
+    routine_info.value = {
+      ...(await routine_store.find_specific_routine(route.params.id_routine)),
+    };
 
-    routine_info.value = specific_routine.resource;
-
-    preparation_time.value = routine_info.value.time_before_start;
+    preparation_time.value = { ...routine_info.value.time_before_start };
 
     fix_preparation_time();
 
     routine_info.value.created_at = routine_info.value.created_at.split("T")[0];
 
-    const days = await day_store.find_days_of_routine(route.params.id_routine);
+    days_of_routine.value = [
+      ...(await day_store.find_days_of_routine(route.params.id_routine)),
+    ];
 
-    days_of_routine.value = days.resource;
+    days_available.value = [...(await day_store.find_all_days())];
 
-    const all_days = await day_store.find_all_days();
-
-    days_available.value = all_days.resource;
-
-    const exercises = await exercise_store.find_exercises_of_routine(
-      route.params.id_routine
-    );
-
-    exercises_of_routine.value = exercises.resource;
+    exercises_of_routine.value = [
+      ...(await exercise_store.find_exercises_of_routine(
+        route.params.id_routine
+      )),
+    ];
 
     await add_all_added_exercises(exercise_store.selected_exercises);
-
-    data_is_loaded.value = true;
   } catch (err) {
     error.value = err.response.data.resource.message;
   }

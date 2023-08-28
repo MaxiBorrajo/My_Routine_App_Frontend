@@ -19,7 +19,9 @@ export const useRoutineStore = defineStore("routine", () => {
    */
   async function create_new_routine(data) {
     try {
-      return (await axios.post("/routine", data)).data;
+      const result = await axios.post("/routine", data);
+
+      return result.data.success;
     } catch (error) {
       throw error;
     }
@@ -68,7 +70,9 @@ export const useRoutineStore = defineStore("routine", () => {
         });
       }
 
-      return (await axios.get(url)).data;
+      const result = await axios.get(url);
+
+      return result.data.resource;
     } catch (error) {
       throw error;
     }
@@ -83,7 +87,9 @@ export const useRoutineStore = defineStore("routine", () => {
    */
   async function find_specific_routine(id_routine) {
     try {
-      return (await axios.get(`/routine/${id_routine}`)).data;
+      const result = await axios.get(`/routine/${id_routine}`);
+
+      return result.data.resource;
     } catch (error) {
       throw error;
     }
@@ -105,7 +111,9 @@ export const useRoutineStore = defineStore("routine", () => {
    */
   async function update_specific_routine(id_routine, data) {
     try {
-      return (await axios.put(`/routine/${id_routine}`, data)).data;
+      const result = await axios.put(`/routine/${id_routine}`, data);
+
+      return result.data.success;
     } catch (error) {
       throw error;
     }
@@ -120,7 +128,9 @@ export const useRoutineStore = defineStore("routine", () => {
    */
   async function find_routines_of_exercise(id_exercise) {
     try {
-      return (await axios.get(`/routine/exercise/${id_exercise}`)).data;
+      const result = await axios.get(`/routine/exercise/${id_exercise}`);
+
+      return result.data.resource;
     } catch (error) {
       throw error;
     }
@@ -135,7 +145,9 @@ export const useRoutineStore = defineStore("routine", () => {
    */
   async function delete_specific_routine(id_routine) {
     try {
-      return (await axios.delete(`/routine/${id_routine}`)).data;
+      const result = await axios.delete(`/routine/${id_routine}`);
+
+      return result.data.success;
     } catch (error) {
       throw error;
     }
@@ -153,9 +165,12 @@ export const useRoutineStore = defineStore("routine", () => {
    */
   async function add_exercise_to_routine(id_exercise, id_routine, data) {
     try {
-      return (
-        await axios.post(`/routine/${id_routine}/exercise/${id_exercise}`, data)
-      ).data;
+      const result = await axios.post(
+        `/routine/${id_routine}/exercise/${id_exercise}`,
+        data
+      );
+
+      return result.data.success;
     } catch (error) {
       throw error;
     }
@@ -173,9 +188,12 @@ export const useRoutineStore = defineStore("routine", () => {
    */
   async function change_order_of_an_exercise(id_exercise, id_routine, data) {
     try {
-      return (
-        await axios.put(`/routine/${id_routine}/exercise/${id_exercise}`, data)
-      ).data;
+      const result = await axios.put(
+        `/routine/${id_routine}/exercise/${id_exercise}`,
+        data
+      );
+
+      return result.data.success;
     } catch (error) {
       throw error;
     }
@@ -191,9 +209,11 @@ export const useRoutineStore = defineStore("routine", () => {
    */
   async function remove_exercise_from_routine(id_exercise, id_routine) {
     try {
-      return (
-        await axios.delete(`/routine/${id_routine}/exercise/${id_exercise}`)
-      ).data;
+      const result = await axios.delete(
+        `/routine/${id_routine}/exercise/${id_exercise}`
+      );
+
+      return result.data.success;
     } catch (error) {
       throw error;
     }
@@ -207,7 +227,26 @@ export const useRoutineStore = defineStore("routine", () => {
    */
   async function find_last_id_routine() {
     try {
-      return (await axios.get(`/routine/last`)).data;
+      const result = await axios.get(`/routine/last`);
+
+      return result.data.resource;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Function that gets amount of exercises of a routine
+   * @param {Number} id_routine - Id of the routine searched
+   * @returns {Object} A object with a message or the resource requested
+   * @throws {Object} If something goes wrong returns an object with specifications
+   * of the error
+   */
+  async function find_amount_exercises_of_routine(id_routine) {
+    try {
+      const result = await axios.get(`/routine/${id_routine}/amount/exercises`);
+
+      return result.data.resource;
     } catch (error) {
       throw error;
     }
@@ -224,6 +263,7 @@ export const useRoutineStore = defineStore("routine", () => {
     add_exercise_to_routine,
     change_order_of_an_exercise,
     remove_exercise_from_routine,
-    find_last_id_routine
+    find_last_id_routine,
+    find_amount_exercises_of_routine,
   };
 });

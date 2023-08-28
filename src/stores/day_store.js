@@ -14,7 +14,9 @@ export const useDayStore = defineStore("day", () => {
    */
   async function assign_day_to_routine(data) {
     try {
-      return (await axios.post("/day/scheduled", data)).data;
+      const result = await axios.post("/day/scheduled", data);
+
+      return result.data.success;
     } catch (error) {
       throw error;
     }
@@ -28,7 +30,9 @@ export const useDayStore = defineStore("day", () => {
    */
   async function find_all_days() {
     try {
-      return (await axios.get("/day")).data;
+      const result = await axios.get("/day");
+
+      return result.data.resource;
     } catch (error) {
       throw error;
     }
@@ -43,7 +47,9 @@ export const useDayStore = defineStore("day", () => {
    */
   async function find_days_of_routine(id_routine) {
     try {
-      return (await axios.get(`/day/routine/${id_routine}`)).data;
+      const result = await axios.get(`/day/routine/${id_routine}`);
+
+      return result.data.resource;
     } catch (error) {
       throw error;
     }
@@ -59,7 +65,9 @@ export const useDayStore = defineStore("day", () => {
    */
   async function unscheduled_day_from_routine(id_day, id_routine) {
     try {
-      return (await axios.delete(`/day/${id_day}/routine/${id_routine}`)).data;
+      const result = await axios.delete(`/day/${id_day}/routine/${id_routine}`);
+
+      return result.data.success;
     } catch (error) {
       throw error;
     }

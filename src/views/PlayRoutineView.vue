@@ -55,9 +55,9 @@ const routine_store = useRoutineStore();
 
 const data_is_not_loaded = ref(true);
 
-const routine = ref(null);
+const routine = ref({});
 
-const exercises_of_routine = ref(null);
+const exercises_of_routine = ref([]);
 
 const current_exercise_index = ref(0);
 
@@ -83,17 +83,15 @@ function change_exercise() {
 /*Liefehooks in charge of getting the routine information,
 the exercises of the routine and renders the view */
 onBeforeMount(async () => {
-  const found_routine = await routine_store.find_specific_routine(
-    route.params.id_routine
-  );
+  routine.value = {
+    ...(await routine_store.find_specific_routine(route.params.id_routine)),
+  };
 
-  routine.value = found_routine.resource;
-
-  const found_exercises = await exercise_store.find_exercises_of_routine(
-    route.params.id_routine
-  );
-
-  exercises_of_routine.value = found_exercises.resource;
+  exercises_of_routine.value = [
+    ...(await exercise_store.find_exercises_of_routine(
+      route.params.id_routine
+    )),
+  ];
 
   data_is_not_loaded.value = false;
 });
@@ -107,13 +105,9 @@ onBeforeMount(async () => {
   height: auto;
   min-height: 100vh;
 
-  
-
   &__views {
     width: 100%;
     height: auto;
   }
 }
-
-
 </style>

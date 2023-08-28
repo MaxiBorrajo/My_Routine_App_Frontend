@@ -56,7 +56,7 @@
         <ButtonComponent
           button-label="Sign up with google"
           button_type="text"
-          button-href="http://localhost:3000/v1/user/google"
+          :button-href="link_google"
           button-prepend-icon="fa-brands fa-google"
           button-color="#4185F4"
           class="google_button"
@@ -93,6 +93,8 @@ const show_password = ref(false);
 
 const error = ref(null);
 
+const link_google = import.meta.env.VITE_URL_GOOGLE
+
 //Methods
 
 /*Function that allows user to create a new account */
@@ -105,7 +107,7 @@ async function register(data_form) {
 
       localStorage.setItem(
         "current_user_info",
-        JSON.stringify(result.resource)
+        JSON.stringify(result)
       );
 
       VueCookies.set("_is_logged_in", true);

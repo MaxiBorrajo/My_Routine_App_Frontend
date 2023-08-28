@@ -72,16 +72,19 @@ const open_snackbar = ref(false);
 
 /*Function that sends the feedback of the user */
 async function send_feedback(data_form) {
-  const { valid } = await form.value.validate();
-  
-  if (valid) {
-  open_snackbar.value = false;
-  const result = await user_store.send_feedback(data_form);
-  if (result.success) {
-    open_snackbar.value = true;
-  } else {
-    error.value = result.resource.message;
-  }}
+  try {
+    const { valid } = await form.value.validate();
+
+    if (valid) {
+      open_snackbar.value = false;
+
+      await user_store.send_feedback(data_form);
+
+      open_snackbar.value = true;
+    }
+  } catch (error) {
+    error.value = err.response.data.resource.message;
+  }
 }
 </script>
 

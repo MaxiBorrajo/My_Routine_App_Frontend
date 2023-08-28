@@ -1,7 +1,6 @@
 <template>
   <!-- Time set view section -->
   <section
-    v-if="data_is_loaded"
     class="time-set-view-section text-center d-flex flex-column align-center justify-center"
   >
     <!-- Time set view section title -->
@@ -21,7 +20,7 @@
 
 <script setup>
 //Imports
-import { onBeforeMount, ref, computed } from "vue";
+import { computed } from "vue";
 import CountdownComponent from "../components/CountdownComponent.vue";
 
 //Variables
@@ -31,8 +30,6 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["set_finished"]);
-
-const data_is_loaded = ref(false);
 
 const weight_unit = computed(()=>{
   return JSON.parse(localStorage.getItem("current_user_info")).weight
@@ -44,11 +41,6 @@ const weight_unit = computed(()=>{
 function set_finished() {
   emit("set_finished");
 }
-
-//Lifehooks that renders the view
-onBeforeMount(() => {
-  data_is_loaded.value = true;
-});
 </script>
 
 <style scoped lang="scss">

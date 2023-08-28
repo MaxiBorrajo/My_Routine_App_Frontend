@@ -43,10 +43,10 @@ const props = defineProps({
 
 //Methods
 /*Function that updates the usage of a routine*/
-async function update_usage() {
+function update_usage() {
   props.routine_info.usage_routine++;
 
-  await routine_store.update_specific_routine(
+  routine_store.update_specific_routine(
     props.routine_info.id_routine,
     props.routine_info
   );

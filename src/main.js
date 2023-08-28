@@ -50,7 +50,7 @@ const vuetify = createVuetify({
           card: "#212121",
           text: "#ffffff",
           attention: "#ffffff",
-          soft_attention: "#e6e6e6",
+          soft_attention: "#757575",
         },
       },
       custom: {
@@ -60,7 +60,7 @@ const vuetify = createVuetify({
           card: "#212121",
           text: "#ffffff",
           attention: "#ff1c1c",
-          soft_attention: "#bd1515",
+          soft_attention: "#6e0909",
         },
       },
     },

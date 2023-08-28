@@ -1,138 +1,138 @@
 <template>
   <section class="routine_section">
-      <!-- Routines filter and sort by part -->
-      <div class="routine_section__selects d-flex justify-end align-center">
-        <ButtonComponent
-          button-variant="text"
-          button-type="text"
-          button-append-icon="fa-solid fa-caret-down"
-          button-label="filter & sorting"
-          id="filter_routines_menu_activator"
-          class="filter__button"
-        />
-      </div>
-      <!-- Filter and sort by menu -->
-      <v-menu
-        activator="#filter_routines_menu_activator"
-        location="bottom"
-        :close-on-content-click="false"
-      >
-        <v-list base-color="text" bg-color="card" min-width="300">
-          <v-list-subheader>OPTIONS</v-list-subheader>
-          <!-- Clear all option -->
-          <v-list-item>
-            <ButtonComponent
-              button-variant="plain"
-              button-type="text"
-              button-prepend-icon="fa-solid fa-trash"
-              button-label="clear all"
-              @click="clear_all_filter_and_sorting"
-            />
-          </v-list-item>
-          <!-- Options -->
-          <v-list-item>
-            <!-- Sort by -->
-            <v-select
-              :items="sort_by_options"
-              item-title="sort_by"
-              item-value="value"
-              density="compact"
-              label="Sort by"
-              v-model="selected_sort_by"
-              base-color="text"
-              color="text"
-            ></v-select
-          ></v-list-item>
-          <!-- Order -->
-          <v-list-item v-if="selected_sort_by">
-            <v-select
-              :items="order_options"
-              density="compact"
-              label="Order"
-              v-if="selected_sort_by"
-              item-title="order"
-              item-value="value"
-              v-model="select_order"
-              base-color="text"
-              color="text"
-              @update:modelValue="applied_filters_and_sorting"
-            ></v-select>
-          </v-list-item>
-          <!-- Filter -->
-          <v-list-item>
-            <v-select
-              :items="filter_options"
-              item-title="filter"
-              item-value="value"
-              density="compact"
-              label="Filter"
-              v-model="selected_filter"
-              base-color="text"
-              color="text"
-            ></v-select>
-          </v-list-item>
-          <!-- Filter values -->
-          <v-list-item v-if="selected_filter">
-            <v-select
-              :items="return_filter_values(selected_filter)"
-              item-title="title"
-              item-value="value"
-              density="compact"
-              label="Filter values"
-              v-if="selected_filter"
-              :multiple="selected_filter === 'day'"
-              v-model="selected_filter_values"
-              base-color="text"
-              color="text"
-              @update:modelValue="applied_filters_and_sorting"
-            >
-              <template v-slot:selection="{ item, index }">
-                <v-chip v-if="index < 1">
-                  <span>{{ item.title }}</span>
-                </v-chip>
-                <span
-                  v-if="index === 1"
-                  class="text-grey text-caption align-self-center"
-                >
-                  (+{{ selected_filter_values.length - 1 }} others)
-                </span>
-              </template>
-            </v-select>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-      <!-- All routines section -->
-      <div class="routine_section__routines d-flex flex-column align-center">
-        <!-- Create routine button -->
-        <ButtonComponent
-          button-variant="outlined"
-          button-type="text"
-          button-prepend-icon="fa-solid fa-plus"
-          button-label="create new routine"
-          id="create_routine_button"
-          button-color="text"
-          :button-route="{ name: 'CreateRoutine' }"
-        />
-        <!-- Error Component -->
-        <ErrorComponent v-if="error" :error_component_message="error" />
-        <!-- Routine card component -->
-        <RoutineCardComponent
-          v-if="paginated_routines().length > 0"
-          v-for="routine in paginated_routines()"
-          :routine_card_data="routine"
-          :routine_card_current_page="current_page"
-        />
-        <h2 v-else id="no_routines_found" class="text-center">
-          No routine was found
-        </h2>
-      </div>
-      <!-- Pagination component -->
-      <PaginationComponent
-        v-model="current_page"
-        :pagination_total_amount="routines.length"
-        :pagination_amount_per_page="3"
-        class="pagination"
+    <!-- Routines filter and sort by part -->
+    <div class="routine_section__selects d-flex justify-end align-center">
+      <ButtonComponent
+        button-variant="text"
+        button-type="text"
+        button-append-icon="fa-solid fa-caret-down"
+        button-label="filter & sorting"
+        id="filter_routines_menu_activator"
+        class="filter__button"
       />
+    </div>
+    <!-- Filter and sort by menu -->
+    <v-menu
+      activator="#filter_routines_menu_activator"
+      location="bottom"
+      :close-on-content-click="false"
+    >
+      <v-list base-color="text" bg-color="card" min-width="300">
+        <v-list-subheader>OPTIONS</v-list-subheader>
+        <!-- Clear all option -->
+        <v-list-item>
+          <ButtonComponent
+            button-variant="plain"
+            button-type="text"
+            button-prepend-icon="fa-solid fa-trash"
+            button-label="clear all"
+            @click="clear_all_filter_and_sorting"
+          />
+        </v-list-item>
+        <!-- Options -->
+        <v-list-item>
+          <!-- Sort by -->
+          <v-select
+            :items="sort_by_options"
+            item-title="sort_by"
+            item-value="value"
+            density="compact"
+            label="Sort by"
+            v-model="selected_sort_by"
+            base-color="text"
+            color="text"
+          ></v-select
+        ></v-list-item>
+        <!-- Order -->
+        <v-list-item v-if="selected_sort_by">
+          <v-select
+            :items="order_options"
+            density="compact"
+            label="Order"
+            v-if="selected_sort_by"
+            item-title="order"
+            item-value="value"
+            v-model="select_order"
+            base-color="text"
+            color="text"
+            @update:modelValue="applied_filters_and_sorting"
+          ></v-select>
+        </v-list-item>
+        <!-- Filter -->
+        <v-list-item>
+          <v-select
+            :items="filter_options"
+            item-title="filter"
+            item-value="value"
+            density="compact"
+            label="Filter"
+            v-model="selected_filter"
+            base-color="text"
+            color="text"
+          ></v-select>
+        </v-list-item>
+        <!-- Filter values -->
+        <v-list-item v-if="selected_filter">
+          <v-select
+            :items="return_filter_values(selected_filter)"
+            item-title="title"
+            item-value="value"
+            density="compact"
+            label="Filter values"
+            v-if="selected_filter"
+            :multiple="selected_filter === 'day'"
+            v-model="selected_filter_values"
+            base-color="text"
+            color="text"
+            @update:modelValue="applied_filters_and_sorting"
+          >
+            <template v-slot:selection="{ item, index }">
+              <v-chip v-if="index < 1">
+                <span>{{ item.title }}</span>
+              </v-chip>
+              <span
+                v-if="index === 1"
+                class="text-grey text-caption align-self-center"
+              >
+                (+{{ selected_filter_values.length - 1 }} others)
+              </span>
+            </template>
+          </v-select>
+        </v-list-item>
+      </v-list>
+    </v-menu>
+    <!-- All routines section -->
+    <div class="routine_section__routines d-flex flex-column align-center">
+      <!-- Create routine button -->
+      <ButtonComponent
+        button-variant="outlined"
+        button-type="text"
+        button-prepend-icon="fa-solid fa-plus"
+        button-label="create new routine"
+        id="create_routine_button"
+        button-color="text"
+        :button-route="{ name: 'CreateRoutine' }"
+      />
+      <!-- Error Component -->
+      <ErrorComponent v-if="error" :error_component_message="error" />
+      <!-- Routine card component -->
+      <RoutineCardComponent
+        v-if="paginated_routines().length > 0"
+        v-for="routine in paginated_routines()"
+        :key="routine.id_routine"
+        :routine_card_data="routine"
+      />
+      <h2 v-else id="no_routines_found" class="text-center">
+        No routine was found
+      </h2>
+    </div>
+    <!-- Pagination component -->
+    <PaginationComponent
+      v-model="current_page"
+      :pagination_total_amount="routines.length"
+      :pagination_amount_per_page="3"
+      class="pagination"
+    />
   </section>
 </template>
 
@@ -245,18 +245,14 @@ function return_filter_values(choosen_filter) {
 /*Function that applies the filters and sorting choosen if there is any */
 async function applied_filters_and_sorting() {
   try {
-    const routines_of_user = await routine_store.find_routines(
-      selected_sort_by.value,
-      select_order.value,
-      selected_filter.value,
-      selected_filter_values.value
-    );
-
-    routines.value = [];
-
-    routines_of_user.resource.forEach((routine) => {
-      routines.value.push(routine);
-    });
+    routines.value = [
+      ...(await routine_store.find_routines(
+        selected_sort_by.value,
+        select_order.value,
+        selected_filter.value,
+        selected_filter_values.value
+      )),
+    ];
   } catch (err) {
     error.value = err.response.data.resource.message;
   }
@@ -288,26 +284,21 @@ watch(selected_filter, () => {
 
 /*Lifehooks*/
 
-/*Lifehook in charge of obtaining certain data 
-from the routines before mounting the component 
+/*Lifehook in charge of obtaining certain data
+from the routines before mounting the component
 and enabling the view when the data is loaded */
 onBeforeMount(async () => {
   try {
     const days = await day_store.find_all_days();
 
-    days.resource.forEach((day) => {
+    days.forEach((day) => {
       days_available.value.push({
         title: day.name_day,
         value: day.id_day,
       });
     });
 
-    const routines_of_user = await routine_store.find_routines();
-
-    routines_of_user.resource.forEach((routine) => {
-      routines.value.push(routine);
-    });
-
+    routines.value =  [...(await routine_store.find_routines())];
   } catch (err) {
     error.value = err.response.data.resource.message;
   }

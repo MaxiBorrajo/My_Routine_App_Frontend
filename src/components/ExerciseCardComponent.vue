@@ -7,7 +7,7 @@
     max-height="200"
     ripple
     @click="go_to_specific_exercise()"
-    v-if="data_is_loaded"
+    v-if="!error"
   >
     <!-- Exercise card first part -->
     <v-card-item>
@@ -77,24 +77,35 @@
     </div>
   </v-card>
   <!-- Exercise card component when data is not loaded yet -->
-  <v-skeleton-loader type="card" v-else color="card"></v-skeleton-loader>
+  <v-card
+    color="card"
+    variant="elevated"
+    elevation="24"
+    max-height="200"
+    ripple
+    class="d-flex justify-center align-center retry"
+    v-else="error"
+  >
+    <ButtonComponent
+      @click="retry"
+      button-prepend-icon="fa-solid fa-arrow-rotate-left"
+      button-label="retry"
+    />
+  </v-card>
 </template>
 
 <script setup>
 //Imports
-import { ref, onBeforeMount, computed, watch } from "vue";
+import { ref, onBeforeMount, computed } from "vue";
 import { useExerciseStore } from "../stores/exercise_store";
-import { useRoutineStore } from "../stores/routine_store";
 import { useMuscleGroupStore } from "../stores/muscle_group_store";
 import { useSetStore } from "../stores/set_store";
-import { VSkeletonLoader } from "vuetify/labs/VSkeletonLoader";
 import { capitalized_first_character } from "../utils/utils_functions";
 import router from "../router";
+import ButtonComponent from "@/components/ButtonComponent.vue";
 
 //Variables
 const exercise_store = useExerciseStore();
-
-const routine_store = useRoutineStore();
 
 const muscle_group_store = useMuscleGroupStore();
 
@@ -102,22 +113,20 @@ const set_store = useSetStore();
 
 const props = defineProps({
   exercise_card_data: Object,
-  exercise_card_current_page: Number,
-  exercise_card_change_occurred: Boolean,
 });
 
-const data_is_loaded = ref(false);
+const error = ref(false);
 
-const amount_routines = ref(null);
+const amount_routines = ref(0);
 
-const amount_muscle_groups = ref(null);
+const amount_muscle_groups = ref(0);
 
 const amount_time_sets = ref(0);
 
 const amount_repetition_sets = ref(0);
 
 const is_exercise_favorite = ref({
-  is_favorite: null,
+  is_favorite: false,
 });
 
 const rest_time = computed(() => {
@@ -173,66 +182,63 @@ const exercise_intensity_class = computed(() => {
 /*Functions that gets the amount of time sets or repetition
 sets that the exercise has */
 const get_amounts_of_sets = async () => {
-  const sets = await set_store.find_all_sets_of_exercise(
+  amount_time_sets.value = await set_store.find_amount_time_sets_of_exercise(
     props.exercise_card_data.id_exercise
   );
 
-  amount_time_sets.value = 0;
-
-  amount_repetition_sets.value = 0;
-
-  sets.resource.forEach((set) => {
-    if (set.time) {
-      amount_time_sets.value++;
-    } else {
-      amount_repetition_sets.value++;
-    }
-  });
+  amount_repetition_sets.value =
+    await set_store.find_amount_repetition_sets_of_exercise(
+      props.exercise_card_data.id_exercise
+    );
 };
 
 /*Function that gets the amount of muscle groups assigned to the exercise */
 const get_amount_muscle_groups = async () => {
-  const muscle_groups = await muscle_group_store.find_muscle_groups_of_exercise(
-    props.exercise_card_data.id_exercise
-  );
-
-  amount_muscle_groups.value = muscle_groups.resource.length;
+  amount_muscle_groups.value =
+    await muscle_group_store.find_amount_muscle_groups_of_exercise(
+      props.exercise_card_data.id_exercise
+    );
 };
 
 /*Functions that gets the amount of routine where the
 exercise is included in */
 const get_amount_routines = async () => {
-  const routines = await routine_store.find_routines_of_exercise(
+  amount_routines.value = await exercise_store.find_amount_routines_of_exercise(
     props.exercise_card_data.id_exercise
   );
-
-  amount_routines.value = routines.resource.length;
 };
 
 /*Function that changes the favorite status of a exercise */
-async function change_favorite() {
+function change_favorite() {
   is_exercise_favorite.value.is_favorite =
     !is_exercise_favorite.value.is_favorite;
 
-  await exercise_store.update_specific_exercise(
+  exercise_store.update_specific_exercise(
     props.exercise_card_data.id_exercise,
     is_exercise_favorite.value
   );
 }
 
 /*Function that obtain certain data of the exercise */
-async function get_exercise_data() {
-  data_is_loaded.value = false;
+function get_exercise_data() {
+  try {
+    is_exercise_favorite.value.is_favorite =
+      props.exercise_card_data.is_favorite;
 
-  is_exercise_favorite.value.is_favorite = props.exercise_card_data.is_favorite;
+    get_amount_routines();
 
-  await get_amount_routines();
+    get_amount_muscle_groups();
 
-  await get_amount_muscle_groups();
+    get_amounts_of_sets();
+  } catch (err) {
+    error.value = true;
+  }
+}
 
-  await get_amounts_of_sets();
+function retry() {
+  error.value = false;
 
-  data_is_loaded.value = true;
+  get_exercise_data();
 }
 
 /*Function that takes you to a specific page of the exercise*/
@@ -245,22 +251,13 @@ function go_to_specific_exercise() {
 
 //Watchers
 
-/*Watcher that is responsible for updating 
-  the data of the exercise every time it detects 
-  a change in the props*/
-watch(props, async () => {
-  await get_exercise_data();
-});
-
 //LifeHooks
 
 /*Lifehook in charge of obtaining certain data 
   from the exercise before mounting the component 
   and enabling the main card when the data is loaded */
-onBeforeMount(async () => {
-  is_exercise_favorite.value.is_favorite = props.exercise_card_data.is_favorite;
-
-  await get_exercise_data();
+onBeforeMount(() => {
+  get_exercise_data();
 });
 </script>
 
@@ -370,6 +367,10 @@ onBeforeMount(async () => {
 
   //Size
   max-width: auto;
+}
+
+.retry {
+  padding: 30px;
 }
 
 //Media queries

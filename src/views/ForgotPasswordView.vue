@@ -69,18 +69,18 @@ const open_snackbar = ref(false);
 
 /*Function that sends an change password email to the one given by the user*/
 async function forgot_password(data_form) {
-  const { valid } = await form.value.validate();
+  try {
+    const { valid } = await form.value.validate();
 
-  if (valid) {
-    open_snackbar.value = false;
+    if (valid) {
+      open_snackbar.value = false;
 
-    const result = await user_store.forgot_password(data_form);
+      await user_store.forgot_password(data_form);
 
-    if (result.success) {
       open_snackbar.value = true;
-    } else {
-      error.value = result.resource.message;
     }
+  } catch (error) {
+    error.value = err.response.data.resource.message;
   }
 }
 </script>

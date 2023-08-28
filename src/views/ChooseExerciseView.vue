@@ -151,12 +151,11 @@
         class="d-flex flex-column align-center"
         v-if="paginated_exercises().length > 0"
       >
-        <v-list-item v-for="exercise in paginated_exercises()">
-          <ExerciseCardComponent
-            :exercise_card_data="exercise"
-            :exercise_card_current_page="current_page"
-            :exercise_card_change_occurred="send_change_occurred"
-          />
+        <v-list-item
+          v-for="exercise in paginated_exercises()"
+          :key="exercise.id_exercise"
+        >
+          <ExerciseCardComponent :exercise_card_data="exercise" />
           <CheckboxComponent
             :checkbox_value="exercise"
             v-model="selected_exercises"
@@ -208,7 +207,7 @@ const muscle_group_store = useMuscleGroupStore();
 
 const exercises = ref([]);
 
-let exercises_available_for_routine = [];
+const exercises_available_for_routine = ref([]);
 
 const selected_exercises = ref([]);
 
@@ -271,9 +270,7 @@ const selected_filter_values = ref([]);
 
 /*Function that selects all exercises available*/
 function select_all_exercises() {
-  exercises.value.forEach((exercise) => {
-    selected_exercises.value.push(exercise);
-  });
+  selected_exercises.value = [...exercises.value];
 }
 
 /*Function that paginates the exercises */
@@ -331,29 +328,25 @@ async function applied_filters_and_sorting() {
     exercises.value = [];
 
     if (route.query.id_routine) {
-      const exercises_of_user = await exercise_store.find_exercises_of_routine(
-        route.query.id_routine,
-        true,
-        selected_sort_by.value,
-        select_order.value,
-        selected_filter.value,
-        selected_filter_values.value
-      );
-
-      exercises_of_user.resource.forEach((exercise) => {
-        exercises.value.push(exercise);
-      });
+      exercises.value = [
+        ...(await exercise_store.find_exercises_of_routine(
+          route.query.id_routine,
+          true,
+          selected_sort_by.value,
+          select_order.value,
+          selected_filter.value,
+          selected_filter_values.value
+        )),
+      ];
     } else {
-      const exercises_of_user = await exercise_store.find_exercises(
-        selected_sort_by.value,
-        select_order.value,
-        selected_filter.value,
-        selected_filter_values.value
-      );
-
-      exercises_of_user.resource.forEach((exercise) => {
-        exercises.value.push(exercise);
-      });
+      exercises.value = [
+        ...(await exercise_store.find_exercises(
+          selected_sort_by.value,
+          select_order.value,
+          selected_filter.value,
+          selected_filter_values.value
+        )),
+      ];
     }
 
     send_change_occurred.value = true;
@@ -378,6 +371,7 @@ function clear_all_filter_and_sorting() {
 /*Function that adds the selected exercises*/
 function add_exercises() {
   exercise_store.selected_exercises = selected_exercises.value;
+
   router.go(-1);
 }
 
@@ -401,30 +395,22 @@ onBeforeMount(async () => {
   try {
     const muscle_groups = await muscle_group_store.find_all_muscle_groups();
 
-    muscle_groups.resource.forEach((day) => {
+    muscle_groups.forEach((muscle_group) => {
       muscle_groups_available.value.push({
-        title: day.name_muscle_group,
-        value: day.id_muscle_group,
+        title: muscle_group.name_muscle_group,
+        value: muscle_group.id_muscle_group,
       });
     });
 
     if (route.query.id_routine) {
-      const exercises_available =
-        await exercise_store.find_exercises_of_routine(
+      exercises.value = [
+        ...(await exercise_store.find_exercises_of_routine(
           route.query.id_routine,
           true
-        );
-
-      exercises_available.resource.forEach((exercise) => {
-        exercises.value.push(exercise);
-        exercises_available_for_routine.push(exercise);
-      });
+        )),
+      ];
     } else {
-      const exercises_available = await exercise_store.find_exercises();
-
-      exercises_available.resource.forEach((exercise) => {
-        exercises.value.push(exercise);
-      });
+      exercises.value = [...(await exercise_store.find_exercises())];
     }
 
     selected_exercises.value = exercise_store.selected_exercises;
@@ -477,7 +463,7 @@ onBeforeMount(async () => {
     //Sizing
     width: 100%;
 
-    padding:  0 0 30px 0;
+    padding: 0 0 30px 0;
 
     //Display
     gap: 10px;

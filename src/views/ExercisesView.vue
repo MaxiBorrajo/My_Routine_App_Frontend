@@ -114,14 +114,14 @@
       <ExerciseCardComponent
         v-if="paginated_exercises().length > 0"
         v-for="exercise in paginated_exercises()"
+        :key="exercise.id_exercise"
         :exercise_card_data="exercise"
-        :exercise_card_current_page="current_page"
-        :exercise_card_change_occurred="send_change_occurred"
       />
       <h2 v-else id="no_exercises_found" class="text-center">
         No exercise was found
       </h2>
       <PaginationComponent
+        v-if="paginated_exercises().length > 0"
         v-model="current_page"
         :pagination_total_amount="exercises.length"
         :pagination_amount_per_page="3"
@@ -262,18 +262,14 @@ async function applied_filters_and_sorting() {
   try {
     send_change_occurred.value = false;
 
-    const exercises_of_user = await exercise_store.find_exercises(
-      selected_sort_by.value,
-      select_order.value,
-      selected_filter.value,
-      selected_filter_values.value
-    );
-
-    exercises.value = [];
-
-    exercises_of_user.resource.forEach((exercise) => {
-      exercises.value.push(exercise);
-    });
+    exercises.value = [
+      ...(await exercise_store.find_exercises(
+        selected_sort_by.value,
+        select_order.value,
+        selected_filter.value,
+        selected_filter_values.value
+      )),
+    ];
 
     send_change_occurred.value = true;
   } catch (err) {
@@ -316,18 +312,14 @@ onBeforeMount(async () => {
   try {
     const muscle_groups = await muscle_group_store.find_all_muscle_groups();
 
-    muscle_groups.resource.forEach((day) => {
+    muscle_groups.forEach((day) => {
       muscle_groups_available.value.push({
         title: day.name_muscle_group,
         value: day.id_muscle_group,
       });
     });
 
-    const exercises_of_user = await exercise_store.find_exercises();
-
-    exercises_of_user.resource.forEach((exercise) => {
-      exercises.value.push(exercise);
-    });
+    exercises.value = [...(await exercise_store.find_exercises())];
   } catch (err) {
     error.value = err.response.data.resource.message;
   }

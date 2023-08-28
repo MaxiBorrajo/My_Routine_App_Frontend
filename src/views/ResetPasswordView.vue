@@ -89,20 +89,18 @@ const show_password = ref(false);
 
 /*Function that changes the user's password with the new one*/
 async function reset_password(data_form) {
-  const { valid } = await form.value.validate();
+  try {
+    const { valid } = await form.value.validate();
 
-  if (valid) {
-    open_snackbar.value = false;
+    if (valid) {
+      open_snackbar.value = false;
 
-    const result = await user_store.reset_password(
-      route.params.token,
-      data_form
-    );
-    if (result.success) {
+      await user_store.reset_password(route.params.token, data_form);
+
       open_snackbar.value = true;
-    } else {
-      error.value = result.resource.message;
     }
+  } catch (error) {
+    error.value = err.response.data.resource.message;
   }
 }
 </script>

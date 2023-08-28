@@ -1,8 +1,5 @@
 <template>
-  <section
-    v-if="data_is_loaded"
-    class="play_exercise_view d-flex align-center justify-center"
-  >
+  <section class="play_exercise_view d-flex align-center justify-center" v-if="data_is_loaded">
     <!-- Play exercise view -->
     <!-- Time set view -->
     <TimeSetView
@@ -53,15 +50,13 @@ const props = defineProps({
 
 const emit = defineEmits(["exercise_finished"]);
 
-const data_is_loaded = ref(false);
-
-const current_sets = ref(null);
+const current_sets = ref([]);
 
 const current_set_index = ref(0);
 
-const rest_after_exercise = ref(null);
+const rest_after_exercise = ref({});
 
-const rest_after_set = ref(null);
+const rest_after_set = ref({});
 
 const show_rest_after_exercise = ref(false);
 
@@ -69,15 +64,17 @@ const show_rest_after_set = ref(false);
 
 const show_set = ref(true);
 
+const data_is_loaded = ref(false)
+
 //Methods
 
 //Function that gets the sets of the current exercise
 async function get_sets_of_exercise() {
-  const found_sets = await set_store.find_all_sets_of_exercise(
-    props.current_exercise.id_exercise
-  );
-
-  current_sets.value = found_sets.resource;
+  current_sets.value = [
+    ...(await set_store.find_all_sets_of_exercise(
+      props.current_exercise.id_exercise
+    )),
+  ];
 }
 
 //Function that changes the current set
@@ -101,8 +98,9 @@ function change_set() {
 function start_new_set() {
   show_rest_after_set.value = false;
 
-  rest_after_set.value =
-    current_sets.value[current_set_index.value].rest_after_set;
+  rest_after_set.value = {
+    ...current_sets.value[current_set_index.value].rest_after_set,
+  };
 
   show_set.value = true;
 }
@@ -118,12 +116,13 @@ function start_new_exercise() {
 
   show_set.value = true;
 
-  rest_after_exercise.value = props.current_exercise.time_after_exercise;
+  rest_after_exercise.value = { ...props.current_exercise.time_after_exercise };
 
   current_set_index.value = 0;
 
-  rest_after_set.value =
-    current_sets.value[current_set_index.value].rest_after_set;
+  rest_after_set.value = {
+    ...current_sets.value[current_set_index.value].rest_after_set,
+  };
 }
 
 //Watchers
@@ -139,10 +138,10 @@ establish the current rests */
 onBeforeMount(async () => {
   await get_sets_of_exercise();
 
-  rest_after_exercise.value = props.current_exercise.time_after_exercise;
+  rest_after_exercise.value = {...props.current_exercise.time_after_exercise};
 
   rest_after_set.value =
-    current_sets.value[current_set_index.value].rest_after_set;
+    {...current_sets.value[current_set_index.value].rest_after_set};
 
   data_is_loaded.value = true;
 });

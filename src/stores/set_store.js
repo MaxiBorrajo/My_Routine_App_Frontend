@@ -23,7 +23,9 @@ export const useSetStore = defineStore("set", () => {
    */
   async function create_new_set(data) {
     try {
-      return (await axios.post(`/set`, data)).data;
+      const result = await axios.post(`/set`, data);
+
+      return result.data.success;
     } catch (error) {
       throw error;
     }
@@ -38,7 +40,47 @@ export const useSetStore = defineStore("set", () => {
    */
   async function find_all_sets_of_exercise(id_exercise) {
     try {
-      return (await axios.get(`/set/exercise/${id_exercise}`)).data;
+      const result = await axios.get(`/set/exercise/${id_exercise}`);
+
+      return result.data.resource;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Function that amount of time sets of exercise
+   * @param {Number} id_exercise - Id of the exercise searched
+   * @returns {Object} A object with a message or the resource requested
+   * @throws {Object} If something goes wrong returns an object with specifications
+   * of the error
+   */
+  async function find_amount_time_sets_of_exercise(id_exercise) {
+    try {
+      const result = await axios.get(
+        `/exercise/${id_exercise}/amount/time_set`
+      );
+
+      return result.data.resource;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Function that amount of repetition sets of exercise
+   * @param {Number} id_exercise - Id of the exercise searched
+   * @returns {Object} A object with a message or the resource requested
+   * @throws {Object} If something goes wrong returns an object with specifications
+   * of the error
+   */
+  async function find_amount_repetition_sets_of_exercise(id_exercise) {
+    try {
+      const result = await axios.get(
+        `/exercise/${id_exercise}/amount/repetition_set`
+      );
+
+      return result.data.resource;
     } catch (error) {
       throw error;
     }
@@ -54,8 +96,11 @@ export const useSetStore = defineStore("set", () => {
    */
   async function delete_specific_set(id_set, id_exercise) {
     try {
-      return (await axios.delete(`/set/${id_set}/exercise/${id_exercise}`))
-        .data;
+      const result = await axios.delete(
+        `/set/${id_set}/exercise/${id_exercise}`
+      );
+
+      return result.data.success;
     } catch (error) {
       throw error;
     }
@@ -81,8 +126,28 @@ export const useSetStore = defineStore("set", () => {
    */
   async function update_specific_set(id_set, id_exercise, data) {
     try {
-      return (await axios.put(`/set/${id_set}/exercise/${id_exercise}`, data))
-        .data;
+      const result = await axios.put(
+        `/set/${id_set}/exercise/${id_exercise}`,
+        data
+      );
+
+      return result.data.success;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Function that finds the id_set of the last set created
+   * @returns {Object} A object with a message or the resource requested
+   * @throws {Object} If something goes wrong returns an object with specifications
+   * of the error
+   */
+  async function find_last_id_set() {
+    try {
+      const result = await axios.get(`/set/last`);
+
+      return result.data.resource;
     } catch (error) {
       throw error;
     }
@@ -94,5 +159,8 @@ export const useSetStore = defineStore("set", () => {
     delete_specific_set,
     find_all_sets_of_exercise,
     update_specific_set,
+    find_amount_repetition_sets_of_exercise,
+    find_amount_time_sets_of_exercise,
+    find_last_id_set
   };
 });

@@ -2,6 +2,7 @@
   <!-- Pagination component -->
   <v-pagination
     :length="pagination_length"
+    :total-visible="3"
     rounded="0"
     @update:model-value="pagination_on_page_change"
     color="attention"

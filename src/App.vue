@@ -4,7 +4,7 @@
     <div class="main_content d-flex justify-center">
       <router-view v-slot="{ Component }">
         <Transition name="bounce" mode="out-in" appear>
-          <keep-alive>
+          <keep-alive :exclude="['SpecificRoutineView', 'SpecificExerciseView', 'MainDashboardView']">
             <component :is="Component"></component>
           </keep-alive>
         </Transition>
@@ -48,7 +48,7 @@ async function get_theme() {
     ) {
       const user = await user_store.get_current_user();
 
-      localStorage.setItem("current_user_info", JSON.stringify(user.resource));
+      localStorage.setItem("current_user_info", JSON.stringify(user));
 
       theme.global.name.value = user.resource.theme;
     } else {

@@ -6,7 +6,6 @@
     elevation="24"
     max-height="200"
     ripple
-    v-if="data_is_loaded"
   >
     <!-- Set main content -->
     <div class="d-flex main_content align-center">
@@ -28,6 +27,8 @@
             set_info.weight = set_info.weight < 0 ? 0 : set_info.weight;
 
             set_info.weight = set_info.weight ? set_info.weight : 0;
+
+            update_set()
           "
         ></v-text-field>
         <p>{{ weight_unit }}</p>
@@ -110,15 +111,12 @@
       </span>
     </div>
   </v-card>
-  <!-- Set card component when data is not loaded yet -->
-  <v-skeleton-loader type="heading" v-else color="card"></v-skeleton-loader>
 </template>
 
 <script setup>
 //Imports
 import { ref, onBeforeMount, watch } from "vue";
 import { useSetStore } from "../stores/set_store";
-import { VSkeletonLoader } from "vuetify/labs/VSkeletonLoader";
 
 //Variables
 const props = defineProps({
@@ -130,17 +128,15 @@ const emit = defineEmits(["set_information_changed"]);
 
 const set_store = useSetStore();
 
-const set_info = ref(null);
+const set_info = ref({});
 
-const type = ref(null);
+const type = ref('');
 
-const weight_unit = ref(null);
+const weight_unit = ref('');
 
-const time_set = ref(null);
+const time_set = ref({});
 
-const rest_time = ref(null);
-
-const data_is_loaded = ref(false);
+const rest_time = ref({});
 
 //Methods
 
@@ -183,7 +179,6 @@ function fix_time(time) {
 
 /*Function that gets and prepared the set information */
 function get_set_info() {
-  data_is_loaded.value = false;
 
   set_info.value = {
     id_set: props.set_card_data.id_set,
@@ -203,16 +198,14 @@ function get_set_info() {
   type.value = set_info.value.type === "time" ? "Time" : "Repetition";
 
   if (type.value === "Time") {
-    time_set.value = set_info.value.quantity;
+    time_set.value = {...set_info.value.quantity};
 
     fix_time(time_set);
   }
 
-  rest_time.value = set_info.value.rest_after_set;
+  rest_time.value = {...set_info.value.rest_after_set};
 
   fix_time(rest_time);
-
-  data_is_loaded.value = true;
 }
 
 /*Watcher */

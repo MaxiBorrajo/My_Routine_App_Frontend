@@ -1,6 +1,5 @@
 <template>
   <section
-    v-if="data_is_loaded"
     class="repetition-set-view-section text-center d-flex align-center justify-center flex-column"
   >
     <!-- Repetition set view -->
@@ -50,7 +49,7 @@
 
 <script setup>
 //Imports
-import { ref, onBeforeMount,computed } from "vue";
+import { ref,computed } from "vue";
 import router from "../router/index";
 
 //Variables
@@ -60,8 +59,6 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["set_finished"]);
-
-const data_is_loaded = ref(false);
 
 const weight_unit = computed(()=>{
   return JSON.parse(localStorage.getItem("current_user_info")).weight
@@ -80,10 +77,6 @@ function go_home() {
 
 /*Lifehooks */
 
-//Lifehooks that renders the view
-onBeforeMount(() => {
-  data_is_loaded.value = true;
-});
 </script>
 
 <style scoped lang="scss">

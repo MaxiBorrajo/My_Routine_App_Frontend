@@ -41,7 +41,7 @@
         <ButtonComponent
           button-label="Sign in with google"
           button_type="text"
-          button-href="http://localhost:3000/v1/user/google"
+          :button-href="link_google"
           button-prepend-icon="fa-brands fa-google"
           button-color="#4185F4"
           class="google_button"
@@ -86,6 +86,8 @@ const error = ref(null);
 
 const open_snackbar = ref(false);
 
+const link_google = import.meta.env.VITE_URL_GOOGLE
+
 /*Function that allows to login*/
 async function login(data_form) {
   const { valid } = await form.value.validate();
@@ -95,13 +97,14 @@ async function login(data_form) {
 
       localStorage.setItem(
         "current_user_info",
-        JSON.stringify(result.resource)
+        JSON.stringify(result)
       );
 
       VueCookies.set("_is_logged_in", true);
 
       router.push({ name: "Dashboard" });
     } catch (err) {
+      console.log(err)
       error.value = err.response.data.resource.message;
     }
   }

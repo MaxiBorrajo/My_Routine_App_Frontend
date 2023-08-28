@@ -14,7 +14,9 @@ export const useMuscleGroupStore = defineStore("muscle_group", () => {
    */
   async function assign_muscle_group_to_exercise(data) {
     try {
-      return (await axios.post("/muscle_group/works", data)).data;
+      const result = await axios.post("/muscle_group/works", data);
+
+      return result.data.success;
     } catch (error) {
       throw error;
     }
@@ -28,7 +30,9 @@ export const useMuscleGroupStore = defineStore("muscle_group", () => {
    */
   async function find_all_muscle_groups() {
     try {
-      return (await axios.get("/muscle_group")).data;
+      const result = await axios.get("/muscle_group");
+
+      return result.data.resource;
     } catch (error) {
       throw error;
     }
@@ -43,7 +47,9 @@ export const useMuscleGroupStore = defineStore("muscle_group", () => {
    */
   async function find_muscle_groups_of_exercise(id_exercise) {
     try {
-      return (await axios.get(`/muscle_group/exercise/${id_exercise}`)).data;
+      const result = await axios.get(`/muscle_group/exercise/${id_exercise}`);
+
+      return result.data.resource;
     } catch (error) {
       throw error;
     }
@@ -62,11 +68,30 @@ export const useMuscleGroupStore = defineStore("muscle_group", () => {
     id_exercise
   ) {
     try {
-      return (
-        await axios.delete(
-          `/muscle_group/${id_muscle_group}/exercise/${id_exercise}`
-        )
-      ).data;
+      const result = await axios.delete(
+        `/muscle_group/${id_muscle_group}/exercise/${id_exercise}`
+      );
+
+      return result.data.success;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Function that amount of muscle groups of an exercise
+   * @param {Number} id_exercise - Id of the exercise searched
+   * @returns {Object} A object with a message or the resource requested
+   * @throws {Object} If something goes wrong returns an object with specifications
+   * of the error
+   */
+  async function find_amount_muscle_groups_of_exercise(id_exercise) {
+    try {
+      const result = await axios.get(
+        `/exercise/${id_exercise}/amount/muscle_group`
+      );
+      
+      return result.data.resource;
     } catch (error) {
       throw error;
     }
@@ -78,5 +103,6 @@ export const useMuscleGroupStore = defineStore("muscle_group", () => {
     find_all_muscle_groups,
     find_muscle_groups_of_exercise,
     unassigned_muscle_group_from_exercise,
+    find_amount_muscle_groups_of_exercise,
   };
 });

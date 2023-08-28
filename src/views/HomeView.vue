@@ -64,9 +64,9 @@ async function get_theme() {
     ) {
       const user = await user_store.get_current_user();
 
-      localStorage.setItem("current_user_info", JSON.stringify(user.resource));
+      localStorage.setItem("current_user_info", JSON.stringify(user));
 
-      theme.global.name.value = user.resource.theme;
+      theme.global.name.value = user.theme;
     } else {
       const user = JSON.parse(localStorage.getItem("current_user_info"));
 

@@ -17,7 +17,7 @@
         <!-- First part -->
         <div
           class="profile-section__main-content__form__first-part"
-          v-if="data_is_loaded"
+          v-if="user_info"
         >
           <!-- Change profile photo -->
           <v-avatar
@@ -61,7 +61,7 @@
         <!-- Second part -->
         <div
           class="profile-section__main-content__form__second-part"
-          v-if="data_is_loaded"
+          v-if="user_info"
         >
           <!-- Change email -->
           <div class="profile-section__main-content__form__field">
@@ -126,7 +126,7 @@
         <v-divider></v-divider>
         <div
           class="profile-section__main-content__form__third-part"
-          v-if="data_is_loaded"
+          v-if="user_info"
         >
           <!-- Change experience -->
           <div class="profile-section__main-content__form__field">
@@ -149,7 +149,7 @@
                 'mdi mdi-weight-pound',
               ]"
             />
-            <p id="clarification">
+            <p class="clarification">
               *If you modify the unit of weight, the values will remain
               unchanged and won't be automatically converted to the new unit.
             </p>
@@ -226,9 +226,9 @@
     <!-- Snackbar component -->
     <SnackbarComponent
       v-model="open_snackbar"
-      :snackbar_timeout="3000"
+      :snackbar_timeout="5000"
       :snackbar_multiline="true"
-      snackbar_text="Profile updated successfully"
+      :snackbar_text="snackbar_text"
     />
   </section>
 </template>
@@ -248,7 +248,6 @@ import RatingComponent from "@/components/RatingComponent.vue";
 import SnackbarComponent from "@/components/SnackbarComponent.vue";
 import TextareaComponent from "@/components/TextareaComponent.vue";
 import { VSkeletonLoader } from "vuetify/labs/VSkeletonLoader";
-import { useTheme } from "vuetify";
 
 //Variables
 const user_info = ref(null);
@@ -271,6 +270,8 @@ const open_snackbar = ref(false);
 
 const show_indicator = ref(false);
 
+const snackbar_text = ref("");
+
 //Methods
 
 /**
@@ -283,6 +284,8 @@ function on_photo_profile_change(event) {
   const reader = new FileReader();
 
   reader.onload = (e) => {
+    new_user_info.value = new FormData();
+
     new_user_info.value.append("image", file);
 
     profile_photo.value = e.target.result;
@@ -296,9 +299,9 @@ async function update_profile() {
 
   if (valid) {
     try {
-      data_is_loaded.value = false;
+      snackbar_text.value = "Updating...";
 
-      open_snackbar.value = false;
+      open_snackbar.value = true;
 
       Object.entries(user_info.value).forEach(([key, value]) => {
         new_user_info.value.append(key, value);
@@ -314,13 +317,14 @@ async function update_profile() {
 
       new_user_info.value = new FormData();
 
-      data_is_loaded.value = true;
+      open_snackbar.value = false;
+
+      snackbar_text.value =
+        "Profile updated successfully";
 
       open_snackbar.value = true;
     } catch (err) {
       error.value = err.response.data.resource.message;
-
-      data_is_loaded.value = true;
     }
   }
 }
@@ -332,9 +336,7 @@ onBeforeMount(async () => {
     user_info.value = JSON.parse(localStorage.getItem("current_user_info"));
   } else {
     try {
-      const user = await user_store.get_current_user();
-
-      user_info.value = user.resource;
+      user_info.value = {...await user_store.get_current_user()};
     } catch (err) {
       error.value = err.response.data.resource.message;
     }
@@ -342,8 +344,6 @@ onBeforeMount(async () => {
   profile_photo.value = user_info.value.url_profile_photo;
 
   user_info.value.date_birth = user_info.value.date_birth.split("T")[0];
-
-  data_is_loaded.value = true;
 });
 </script>
 
@@ -475,11 +475,7 @@ onBeforeMount(async () => {
 }
 
 //Clarification style
-#clarification {
-  //Font
-  font-size: 14px;
-  font-weight: 300;
-
+.clarification {
   //Spacing
   padding: 10px 0;
 }

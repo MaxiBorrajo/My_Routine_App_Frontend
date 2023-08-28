@@ -1,7 +1,6 @@
 <template>
   <!-- Rest set view -->
   <section
-    v-if="data_is_loaded"
     class="set-rest-view-section text-center d-flex flex-column align-center justify-center"
   >
   <!-- Rest set view title -->
@@ -21,7 +20,7 @@
 
 <script setup>
 //Imports
-import { onBeforeMount, ref } from "vue";
+import { ref } from "vue";
 import CountdownComponent from "@/components/CountdownComponent.vue";
 
 //Variables
@@ -32,8 +31,6 @@ const props = defineProps({
 
 const emit = defineEmits(["set_rest_finished"]);
 
-const data_is_loaded = ref(false);
-
 //Methods
 /*Function that emits an event that indicates that the set rest has finished*/
 function set_rest_finished() {
@@ -42,10 +39,6 @@ function set_rest_finished() {
 
 /*Lifehooks*/
 
-//Lifehooks that renders the view
-onBeforeMount(() => {
-  data_is_loaded.value = true;
-});
 </script>
 
 <style scoped lang="scss">

@@ -16,7 +16,9 @@ export const usePhotoExerciseStore = defineStore("photo_exercise", () => {
    */
   async function create_new_photo(id_exercise, data) {
     try {
-      return (await axios.post(`/photo/exercise/${id_exercise}`, data)).data;
+      const result = await axios.post(`/photo/exercise/${id_exercise}`, data);
+
+      return result.data.success;
     } catch (error) {
       throw error;
     }
@@ -32,7 +34,9 @@ export const usePhotoExerciseStore = defineStore("photo_exercise", () => {
    */
   async function find_all_photos_of_exercise(id_exercise) {
     try {
-      return (await axios.get(`/photo/exercise/${id_exercise}`)).data;
+      const result = await axios.get(`/photo/exercise/${id_exercise}`);
+
+      return result.data.resource;
     } catch (error) {
       throw error;
     }
@@ -49,8 +53,11 @@ export const usePhotoExerciseStore = defineStore("photo_exercise", () => {
    */
   async function delete_photo_of_exercise(public_id, id_exercise) {
     try {
-      return (await axios.delete(`/photo/${public_id}/exercise/${id_exercise}`))
-        .data;
+      const result = await axios.delete(
+        `/photo/${public_id}/exercise/${id_exercise}`
+      );
+      
+      return result.data.success;
     } catch (error) {
       throw error;
     }

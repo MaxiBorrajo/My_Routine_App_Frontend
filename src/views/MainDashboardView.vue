@@ -1,7 +1,7 @@
 <template>
   <section class="dashboard_section">
     <!-- Dashboard section -->
-    <div v-if="data_is_loaded">
+    <div>
       <div class="d-flex align-center justify-center dashboard_section__navbar">
         <!-- Dashboard section tabs -->
         <v-tabs v-model="tab" color="text" align-tabs="center">
@@ -52,8 +52,6 @@
         </v-window-item>
       </v-window>
     </div>
-    <!-- Loader component when data is not loaded yet -->
-    <LoaderComponent v-else v-model="show_loader" />
   </section>
 </template>
 
@@ -66,7 +64,6 @@ import { useUserStore } from "../stores/user_store";
 import { useExerciseStore } from "../stores/exercise_store";
 import RoutinesView from "@/views/RoutinesView.vue";
 import ExercisesView from "@/views/ExercisesView.vue";
-import LoaderComponent from "@/components/LoaderComponent.vue";
 import VueCookies from "vue-cookies";
 
 //Variables
@@ -75,10 +72,6 @@ const user_store = useUserStore();
 const exercise_store = useExerciseStore();
 
 const theme = useTheme();
-
-const show_loader = ref(true);
-
-const data_is_loaded = ref(false);
 
 const profile_photo = ref("");
 
@@ -90,21 +83,16 @@ const tab = ref(null);
 
 /*Function that gets data of the current user */
 const get_user_data = async () => {
-  data_is_loaded.value = false;
-
-  show_loader.value = true;
-
   if (!localStorage.getItem("current_user_info")) {
     try {
       const user = await user_store.get_current_user();
 
-      localStorage.setItem("current_user_info", JSON.stringify(user.resource));
+      localStorage.setItem("current_user_info", JSON.stringify(user));
 
-      profile_photo.value = user.resource.url_profile_photo;
+      profile_photo.value = user.url_profile_photo;
 
-      theme.global.name.value = user.resource.theme;
+      theme.global.name.value = user.theme;
     } catch (err) {
-      show_loader.value = false;
 
       error.value = err.response.data.resource.message;
     }
@@ -115,10 +103,6 @@ const get_user_data = async () => {
 
     theme.global.name.value = user.theme;
   }
-
-  show_loader.value = false;
-
-  data_is_loaded.value = true;
 };
 
 /*Function that allows user to sign out */
@@ -139,13 +123,13 @@ async function sign_out() {
 //Watchers
 
 /*Lifehooks */
-onBeforeUpdate(async () => {
-  await get_user_data();
+onBeforeUpdate(() => {
+  get_user_data();
 });
 
 /*Obtain user's information before mounting the component */
-onBeforeMount(async () => {
-  await get_user_data();
+onBeforeMount(() => {
+  get_user_data();
 
   exercise_store.selected_exercises = [];
 });

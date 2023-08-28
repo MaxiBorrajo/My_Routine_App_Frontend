@@ -4,10 +4,7 @@
     @click="change_volume"
     class="volume-button"
   ></v-icon>
-  <div
-    class="d-flex justify-center countdown-section__countdown"
-    v-if="data_is_loaded"
-  >
+  <div class="d-flex justify-center countdown-section__countdown">
     <!-- Countdown -->
     <ProgressCircularComponent
       progress_circular_color="attention"
@@ -78,7 +75,7 @@ const props = defineProps({
 
 const emit = defineEmits(["countdown_finished"]);
 
-const countdown = ref(null);
+const countdown = ref({});
 
 const user_store = useUserStore();
 
@@ -116,14 +113,13 @@ const progress = ref(100);
 
 let total_seconds;
 
-const data_is_loaded = ref(false);
-
 let interval_id;
 
 //Methods
 /*Function that changes the circular progress of the countdown based on the total time*/
 function change_progress() {
   let value_to_rest = 100 / total_seconds;
+
   progress.value -= value_to_rest;
 }
 
@@ -188,15 +184,11 @@ function toggle_pause() {
   is_paused.value = !is_paused.value;
 
   if (is_paused.value) {
-    if (countdown_sound.currentTime !== 0) {
-      countdown_sound.pause();
-    }
+    if (countdown_sound.currentTime !== 0) countdown_sound.pause();
 
     clearInterval(interval_id);
   } else {
-    if (countdown_sound.currentTime !== 0) {
-      countdown_sound.play();
-    }
+    if (countdown_sound.currentTime !== 0) countdown_sound.play();
 
     start_countdown();
   }
@@ -206,9 +198,7 @@ function toggle_pause() {
 function go_home() {
   clearInterval(interval_id);
 
-  if (countdown_sound.currentTime !== 0) {
-    countdown_sound.pause();
-  }
+  if (countdown_sound.currentTime !== 0) countdown_sound.pause();
 
   router.push({ name: "Home" });
 }
@@ -230,11 +220,7 @@ function change_volume() {
 
   user_store.volume_on = volume_on.value;
 
-  if (volume_on.value) {
-    countdown_sound.volume = 1;
-  } else {
-    countdown_sound.volume = 0;
-  }
+  countdown_sound.volume = volume_on.value ? 1 : 0;
 }
 
 /*Lifehooks */
@@ -259,8 +245,6 @@ onBeforeMount(() => {
   } else {
     countdown_sound.volume = 0;
   }
-
-  data_is_loaded.value = true;
 });
 </script>
 

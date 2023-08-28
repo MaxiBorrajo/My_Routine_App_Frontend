@@ -12,7 +12,7 @@
     <v-form ref="form" @submit.prevent="create_routine()">
       <div
         class="routine-section__first-part d-flex flex-column"
-        v-if="data_is_loaded"
+        v-if="new_routine"
       >
         <!-- Routine section first part title -->
         <span
@@ -35,7 +35,7 @@
       <!-- Routine section description -->
       <div
         class="routine-section__description d-flex flex-column"
-        v-if="data_is_loaded"
+        v-if="new_routine"
       >
         <TextareaComponent
           :input_clearable="true"
@@ -52,7 +52,7 @@
       <!-- Routine section days selected -->
       <div
         class="routine-section__days-selected d-flex flex-column"
-        v-if="data_is_loaded"
+        v-if="new_routine"
       >
         <p>Assigned days</p>
         <div class="d-flex justify-center">
@@ -81,7 +81,7 @@
       <!-- Routine section preparation time -->
       <div
         class="routine-section__preparation-time d-flex flex-column"
-        v-if="data_is_loaded"
+        v-if="new_routine"
       >
         <p>Preparation time</p>
         <div class="d-flex justify-center">
@@ -133,7 +133,7 @@
       <!-- Routine section exercises -->
       <div
         class="routine-section__exercises d-flex flex-column"
-        v-if="data_is_loaded"
+        v-if="new_routine"
       >
         <!-- Routine section exercises title and options -->
         <span class="d-flex align-center routine-section__description__title"
@@ -175,6 +175,7 @@
           </v-tooltip>
         </span>
         <!-- Routine section list of exercises -->
+        {{ choosed_exercises }}
         <v-list
           base-color="text"
           bg-color="background_color"
@@ -290,8 +291,6 @@ const exercise_store = useExerciseStore();
 
 const routine_store = useRoutineStore();
 
-const data_is_loaded = ref(false);
-
 const form = ref(null);
 
 const new_routine = ref({
@@ -337,13 +336,13 @@ async function assign_days() {
   try {
     const last_id = await routine_store.find_last_id_routine();
 
-    selected_days.value.forEach(async (id_day) => {
+    selected_days.value.forEach((id_day) => {
       const data = {
         id_day: id_day,
-        id_routine: last_id.resource,
+        id_routine: last_id,
       };
 
-      await day_store.assign_day_to_routine(data);
+      day_store.assign_day_to_routine(data);
     });
   } catch (err) {
     error.value = err.response.data.resource.message;
@@ -357,14 +356,11 @@ async function assign_exercises() {
   try {
     const last_id = await routine_store.find_last_id_routine();
 
-    choosed_exercises.value.forEach(async (exercise, index) => {
-      await routine_store.add_exercise_to_routine(
-        exercise.id_exercise,
-        last_id.resource,
-        {
-          exercise_order: index + 1,
-        }
-      );
+    choosed_exercises.value.forEach((exercise, index) => {
+      
+      routine_store.add_exercise_to_routine(exercise.id_exercise, last_id, {
+        exercise_order: index + 1,
+      });
     });
   } catch (err) {
     error.value = err.response.data.resource.message;
@@ -383,13 +379,13 @@ async function create_routine() {
 
       new_routine.value.time_before_start = `${preparation_time.value.minutes} minutes ${preparation_time.value.seconds} seconds`;
 
-      await routine_store.create_new_routine(new_routine.value);
+      const result = await routine_store.create_new_routine(new_routine.value);
 
-      await assign_days();
+      if (result) {
+        assign_exercises();
 
-      await assign_exercises();
-
-      exercise_store.selected_exercises = [];
+        assign_days();
+      }
 
       show_loader.value = false;
 
@@ -439,9 +435,7 @@ function open_dialog(dialog_title, dialog_text, dialog_action) {
 
 /*Function that selects all exercises available*/
 function select_all_exercises() {
-  choosed_exercises.value.forEach((exercise) => {
-    selected_exercises.value.push(exercise);
-  });
+  choosed_exercises.value = [...selected_exercises.value];
 }
 
 /*Function removes all selected exercises of the routine */
@@ -463,17 +457,13 @@ async function remove_all_selected_exercises() {
 
 /*Obtain the selected exercises and make them choosed ones*/
 onUpdated(() => {
-  choosed_exercises.value = exercise_store.selected_exercises;
+  choosed_exercises.value = [...exercise_store.selected_exercises];
 });
 
 /*Gets certain routine's data before view is mounted*/
 onBeforeMount(async () => {
   try {
-    const all_days = await day_store.find_all_days();
-
-    days_available.value = all_days.resource;
-
-    data_is_loaded.value = true;
+    days_available.value = [...(await day_store.find_all_days())];
   } catch (err) {
     error.value = err.response.data.resource.message;
   }

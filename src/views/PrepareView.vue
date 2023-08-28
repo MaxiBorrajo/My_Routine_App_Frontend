@@ -1,6 +1,5 @@
 <template>
   <section
-    v-if="data_is_loaded"
     class="prepare-view-section text-center d-flex flex-column align-center justify-center"
   >
     <!-- Prepare view  -->
@@ -21,7 +20,6 @@
 
 <script setup>
 //Imports
-import { onBeforeMount, ref } from "vue";
 import CountdownComponent from "@/components/CountdownComponent.vue";
 
 //Variables
@@ -32,8 +30,6 @@ const props = defineProps({
 
 const emit = defineEmits(["preparation_finished"]);
 
-const data_is_loaded = ref(false);
-
 //Methods
 //Function that emits an event indicating that preparation time has finished
 function preparation_finished() {
@@ -41,10 +37,7 @@ function preparation_finished() {
 }
 
 //Lifehooks
-/*Lifehooks that renders the view */
-onBeforeMount(() => {
-  data_is_loaded.value = true;
-});
+
 </script>
 
 <style scoped lang="scss">

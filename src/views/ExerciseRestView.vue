@@ -1,6 +1,5 @@
 <template>
   <section
-    v-if="data_is_loaded"
     class="exercise-rest-view-section text-center d-flex flex-column align-center justify-center"
   >
     <!-- Exercise rest view -->
@@ -32,8 +31,6 @@ const props = defineProps({
 
 const emit = defineEmits(["rest_finished"]);
 
-const data_is_loaded = ref(false);
-
 //Methods
 
 /*Function that emits an event that indicates that the rest has finished*/
@@ -43,10 +40,6 @@ function rest_finished() {
 
 /*Lifehooks*/
 
-//Lifehooks that renders the view
-onBeforeMount(() => {
-  data_is_loaded.value = true;
-});
 </script>
 
 <style scoped lang="scss">

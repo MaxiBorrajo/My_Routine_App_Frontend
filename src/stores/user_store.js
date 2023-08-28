@@ -25,7 +25,9 @@ export const useUserStore = defineStore("user", () => {
    */
   async function login(data) {
     try {
-      return (await axios.post("/user/credentials", data)).data;
+      const result = await axios.post("/user/credentials", data);
+
+      return result.data.resource;
     } catch (error) {
       throw error;
     }
@@ -47,7 +49,9 @@ export const useUserStore = defineStore("user", () => {
    */
   async function register(data) {
     try {
-      return (await axios.post("/user", data)).data;
+      const result = await axios.post("/user", data);
+
+      return result.data.resource;
     } catch (error) {
       throw error;
     }
@@ -61,7 +65,9 @@ export const useUserStore = defineStore("user", () => {
    */
   async function get_current_user() {
     try {
-      return (await axios.get("/user")).data;
+      const result = await axios.get("/user");
+
+      return result.data.resource;
     } catch (error) {
       throw error;
     }
@@ -75,7 +81,9 @@ export const useUserStore = defineStore("user", () => {
    */
   async function logout() {
     try {
-      return (await axios.delete("/user/credentials")).data;
+      const result = await axios.delete("/user/credentials");
+
+      return result.data.success;
     } catch (error) {
       throw error;
     }
@@ -91,7 +99,9 @@ export const useUserStore = defineStore("user", () => {
    */
   async function forgot_password(data) {
     try {
-      return (await axios.delete("/user/forgot_password", data)).data;
+      const result = await axios.delete("/user/forgot_password", data);
+
+      return result.data.success;
     } catch (error) {
       throw error;
     }
@@ -110,7 +120,9 @@ export const useUserStore = defineStore("user", () => {
    */
   async function reset_password(token, data) {
     try {
-      return (await axios.put(`/user/reset_password/${token}`, data)).data;
+      const result = await axios.put(`/user/reset_password/${token}`, data);
+
+      return result.data.success;
     } catch (error) {
       throw error;
     }
@@ -137,7 +149,9 @@ export const useUserStore = defineStore("user", () => {
    */
   async function update_current_user(data) {
     try {
-      return (await axios.put("/user", data)).data;
+      const result = await axios.put("/user", data);
+
+      return result.data.success;
     } catch (error) {
       throw error;
     }
@@ -151,7 +165,9 @@ export const useUserStore = defineStore("user", () => {
    */
   async function delete_user() {
     try {
-      return (await axios.delete("/user")).data;
+      const result = await axios.delete("/user");
+
+      return result.data.success;
     } catch (error) {
       throw error;
     }
@@ -167,7 +183,9 @@ export const useUserStore = defineStore("user", () => {
    */
   async function send_feedback(data) {
     try {
-      return (await axios.post("/user/feedback", data)).data;
+      const result = await axios.post("/user/feedback", data);
+
+      return result.data.success;
     } catch (error) {
       throw error;
     }

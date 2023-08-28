@@ -6,7 +6,6 @@
     elevation="24"
     max-height="200"
     ripple
-    v-if="data_is_loaded"
   >
     <!-- Set main content -->
     <div class="d-flex main_content align-center">
@@ -111,34 +110,30 @@
     </div>
   </v-card>
   <!-- Set card component when data is not loaded yet -->
-  <v-skeleton-loader type="heading" v-else color="card"></v-skeleton-loader>
 </template>
 
 <script setup>
 //Imports
 import { ref, onBeforeMount, watch } from "vue";
-import { VSkeletonLoader } from "vuetify/labs/VSkeletonLoader";
 
 //Variables
 const props = defineProps({
   set_card_data: Object,
 });
 
-const set_info = ref(null);
+const set_info = ref({});
 
-const type = ref(null);
+const type = ref('');
 
-const weight_unit = ref(null);
+const weight_unit = ref('');
 
-const time_set = ref(null);
+const time_set = ref({});
 
-const rest_time = ref(null);
-
-const data_is_loaded = ref(false);
+const rest_time = ref({});
 
 //Methods
 /*Function that updates times in the set*/
-async function update_times() {
+function update_times() {
   if (type.value === "Time") {
     fix_time(time_set);
   }
@@ -166,8 +161,6 @@ function fix_time(time) {
 
 /*Function that gets and prepared the set information */
 function get_set_info() {
-  data_is_loaded.value = false;
-
   set_info.value = props.set_card_data;
 
   const user = JSON.parse(localStorage.getItem("current_user_info"));
@@ -185,8 +178,6 @@ function get_set_info() {
   rest_time.value = set_info.value.rest_after_set;
 
   fix_time(rest_time);
-
-  data_is_loaded.value = true;
 }
 
 /*Watcher */

@@ -7,7 +7,7 @@
       <!-- Specific exercise section first part-->
       <div
         class="exercise-section__first-part d-flex flex-column"
-        v-if="data_is_loaded"
+        v-if="exercise_info"
       >
         <!-- Specific exercise section first part title -->
         <span
@@ -23,6 +23,7 @@
             @blur="update_exercise"
           />
         </span>
+
         <!-- Specific exercise section first part exercise name -->
         <span
           class="exercise-section__first-part__title d-flex justify-space-between align-center"
@@ -41,22 +42,19 @@
           </v-tooltip>
         </span>
         <v-divider></v-divider>
+
         <!-- Specific exercise section first part date of creation -->
         <div class="exercise-section__first-part__chips-info d-flex">
           <v-chip label>Created at: {{ exercise_info.created_at }}</v-chip>
         </div>
       </div>
-      <!-- Specific exercise section first part loader -->
-      <div class="exercise-section__first-part d-flex flex-column" v-else>
-        <v-skeleton-loader type="heading" color="card"></v-skeleton-loader>
-        <v-skeleton-loader type="chip" color="card"></v-skeleton-loader>
-      </div>
+      
       <!-- Error component -->
       <ErrorComponent v-if="error" :error_component_message="error" />
       <!-- Specific exercise section description -->
       <div
         class="exercise-section__description d-flex flex-column"
-        v-if="data_is_loaded"
+        v-if="exercise_info"
       >
         <!-- Specific exercise section description input -->
         <span class="d-flex align-center exercise-section__description__title"
@@ -95,12 +93,12 @@
           </p>
         </div>
       </div>
-      <!-- Specific exercise section description loader-->
-      <div class="exercise-section__description d-flex flex-column" v-else>
-        <v-skeleton-loader type="image" color="card"></v-skeleton-loader>
-      </div>
+
       <!-- Specific exercise section options -->
-      <div class="exercise-section__options" v-if="data_is_loaded">
+      <div
+        class="exercise-section__options"
+        v-if="exercise_info && muscle_groups_available"
+      >
         <!-- Specific exercise section options intensity -->
         <div>
           <p>Intensity</p>
@@ -128,21 +126,11 @@
           ></v-select>
         </div>
       </div>
-      <!-- Specific exercise section options loader -->
-      <div class="exercise-section__options" v-else>
-        <v-skeleton-loader
-          type="paragraph, paragraph"
-          color="card"
-        ></v-skeleton-loader>
-        <v-skeleton-loader
-          type="paragraph, paragraph"
-          color="card"
-        ></v-skeleton-loader>
-      </div>
+
       <!-- Specific exercise section gallery-->
       <div
         class="exercise-section__gallery d-flex flex-column"
-        v-if="data_is_loaded"
+        v-if="exercise_info && photos_of_exercise"
       >
         <!-- Specific exercise section gallery title and options -->
         <span class="d-flex align-center exercise-section__description__title"
@@ -180,8 +168,9 @@
           height="300"
         >
           <v-carousel-item
-            v-for="photo in photos_of_exercise"
+            v-for="(photo, index) in photos_of_exercise"
             :src="photo.url_photo"
+            :key="index"
           >
             <CheckboxComponent
               :checkbox_value="photo.public_id"
@@ -199,19 +188,19 @@
           @change="on_photo_change"
         />
       </div>
-      <!-- Specific exercise section gallery loader -->
-      <div class="exercise-section__gallery d-flex flex-column" v-else>
-        <v-skeleton-loader type="image" color="card"></v-skeleton-loader>
-      </div>
+
       <!-- Specific exercise section routines -->
       <div
         class="exercise-section__routines d-flex flex-column"
-        v-if="data_is_loaded"
+        v-if="exercise_info && routines_of_exercise"
       >
         <!-- Specific exercise section routines slide group-->
         <p>Included in:</p>
         <v-slide-group show-arrows v-if="routines_of_exercise.length > 0">
-          <v-slide-group-item v-for="routine in routines_of_exercise">
+          <v-slide-group-item
+            v-for="routine in routines_of_exercise"
+            :key="routine.id_routine"
+          >
             <v-chip
               label
               :to="{
@@ -225,17 +214,10 @@
         </v-slide-group>
         <h2 v-else class="text-center">No routines found</h2>
       </div>
-      <!-- Specific exercise section routines loader-->
-      <div class="exercise-section__routines d-flex flex-column" v-else>
-        <v-skeleton-loader
-          type="chip, chip, chip"
-          color="card"
-        ></v-skeleton-loader>
-      </div>
       <!-- Specific exercise section rest time-->
       <div
         class="exercise-section__rest-time d-flex flex-column"
-        v-if="data_is_loaded"
+        v-if="exercise_info"
       >
         <p>Rest time</p>
         <div class="d-flex justify-center">
@@ -280,19 +262,11 @@
           </div>
         </div>
       </div>
-      <!-- Specific exercise section rest time loader -->
-      <div
-        class="exercise-section__rest-time d-flex align-center justify-center"
-        v-else
-      >
-        <v-skeleton-loader type="image" color="card"></v-skeleton-loader>
-        <v-skeleton-loader type="image" color="card"></v-skeleton-loader>
-        <v-skeleton-loader type="image" color="card"></v-skeleton-loader>
-      </div>
+
       <!-- Specific exercise section sets -->
       <div
         class="exercise-section__sets d-flex flex-column"
-        v-if="data_is_loaded"
+        v-if="exercise_info && sets_of_exercise"
       >
         <!-- Specific exercise section sets title and options -->
         <span class="d-flex align-center exercise-section__description__title"
@@ -366,12 +340,6 @@
         </v-list>
         <h2 v-else class="text-center">Sets not found</h2>
       </div>
-      <!-- Specific exercise section sets loader -->
-      <div class="exercise-section__sets d-flex flex-column" v-else>
-        <v-skeleton-loader type="heading" color="card"></v-skeleton-loader>
-        <v-skeleton-loader type="heading" color="card"></v-skeleton-loader>
-        <v-skeleton-loader type="heading" color="card"></v-skeleton-loader>
-      </div>
       <!-- Specific exercise section sets buttons -->
       <div class="d-flex exercise-section__create-buttons">
         <!-- Specific exercise section sets create set button -->
@@ -395,7 +363,7 @@
       </div>
       <v-divider></v-divider>
       <!-- Specific exercise section sets delete exercise button -->
-      <div class="d-flex justify-start" v-if="data_is_loaded">
+      <div class="d-flex justify-start" v-if="exercise_info">
         <ButtonComponent
           button-type="text"
           button-prepend-icon="fa-solid fa-trash-can"
@@ -412,13 +380,9 @@
           "
         />
       </div>
-      <!-- Specific exercise section sets delete exercise button loader -->
-      <div class="d-flex justify-start" v-else>
-        <v-skeleton-loader type="button" color="#212121"></v-skeleton-loader>
-      </div>
       <!-- Favorite button -->
       <v-tooltip
-        v-if="data_is_loaded"
+        v-if="exercise_info"
         :text="
           exercise_info.is_favorite ? 'Set to not favorite' : 'Set to favorite'
         "
@@ -485,7 +449,6 @@ import SetCardUpgradableComponent from "@/components/SetCardUpgradableComponent.
 import CheckboxComponent from "@/components/CheckboxComponent.vue";
 import DialogComponent from "@/components/DialogComponent.vue";
 import RadioButtonComponent from "@/components/RadioButtonComponent.vue";
-import { VSkeletonLoader } from "vuetify/labs/VSkeletonLoader";
 import router from "../router";
 import { capitalized_first_character } from "../utils/utils_functions";
 
@@ -504,8 +467,6 @@ const photo_exercise_store = usePhotoExerciseStore();
 const set_store = useSetStore();
 
 const error = ref(null);
-
-const data_is_loaded = ref(false);
 
 const file_input = ref(null);
 
@@ -547,12 +508,12 @@ const snackbar_text = ref("");
 //Methods
 
 /*Function that updates the current exercise*/
-async function update_exercise() {
+function update_exercise() {
   if (exercise_info.value.exercise_name) {
     try {
       exercise_info.value.time_after_exercise = `${rest_time.value.minutes} minutes ${rest_time.value.seconds} seconds`;
 
-      await exercise_store.update_specific_exercise(
+      exercise_store.update_specific_exercise(
         route.params.id_exercise,
         exercise_info.value
       );
@@ -589,17 +550,17 @@ function fix_rest_time() {
 }
 
 /*Function that changes favorite state of the exercise */
-async function change_favorite() {
+function change_favorite() {
   exercise_info.value.is_favorite = !exercise_info.value.is_favorite;
 
-  await update_exercise();
+  update_exercise();
 }
 
 /*Function that changes the intensity of the exercise */
-async function change_intensity(value) {
+function change_intensity(value) {
   exercise_info.value.intensity = value;
 
-  await update_exercise();
+  update_exercise();
 }
 
 /*Function that deletes the exercise */
@@ -639,15 +600,13 @@ async function change_set_order() {
         route.params.id_exercise,
         new_set
       );
+
+      sets_of_exercise.value = [
+        ...(await set_store.find_all_sets_of_exercise(
+          route.params.id_exercise
+        )),
+      ];
     });
-
-    const sets = await set_store.find_all_sets_of_exercise(
-      route.params.id_exercise
-    );
-
-    sets_of_exercise.value = [];
-
-    sets_of_exercise.value = sets.resource;
   } catch (err) {
     error.value = err.response.data.resource.message;
   }
@@ -663,23 +622,23 @@ async function delete_all_selected_sets() {
 
       selected_sets.value.forEach(async (id_set) => {
         await set_store.delete_specific_set(id_set, route.params.id_exercise);
+
+        sets_of_exercise.value = [
+          ...(await set_store.find_all_sets_of_exercise(
+            route.params.id_exercise
+          )),
+        ];
+
+        change_set_order();
       });
 
-      setTimeout(async () => {
-        const sets = await set_store.find_all_sets_of_exercise(
-          route.params.id_exercise
-        );
+      open_snackbar.value = false;
 
-        sets_of_exercise.value = sets.resource;
+      snackbar_text.value = "Sets deleted successfully";
 
-        await change_set_order();
+      open_snackbar.value = true;
 
-        snackbar_text.value = "Sets deleted successfully";
-
-        open_snackbar.value = true;
-
-        selected_sets.value = [];
-      }, 1000);
+      selected_sets.value = [];
     } catch (err) {
       error.value = err.response.data.resource.message;
     }
@@ -700,30 +659,26 @@ async function delete_all_selected_photos() {
 
       dialog.value.show_dialog = false;
 
-      data_is_loaded.value = false;
-
       selected_photos.value.forEach(async (public_id) => {
         await photo_exercise_store.delete_photo_of_exercise(
           public_id,
           route.params.id_exercise
         );
+
+        photos_of_exercise.value = [
+          ...(await photo_exercise_store.find_all_photos_of_exercise(
+            route.params.id_exercise
+          )),
+        ];
       });
 
-      setTimeout(async () => {
-        const photos = await photo_exercise_store.find_all_photos_of_exercise(
-          route.params.id_exercise
-        );
+      open_snackbar.value = false;
 
-        photos_of_exercise.value = photos.resource;
+      snackbar_text.value = "Photos deleted successfully";
 
-        snackbar_text.value = "Photos deleted successfully";
+      open_snackbar.value = true;
 
-        data_is_loaded.value = true;
-
-        open_snackbar.value = true;
-
-        selected_photos.value = [];
-      }, 1000);
+      selected_photos.value = [];
     } catch (err) {
       error.value = err.response.data.resource.message;
 
@@ -758,24 +713,24 @@ function open_dialog(dialog_title, dialog_text, dialog_action) {
 async function on_photo_change(event) {
   if (event.target.files[0]) {
     try {
-      data_is_loaded.value = false;
-
       const file = event.target.files[0];
 
       new_photo.value.append("image", file);
 
-      await photo_exercise_store.create_new_photo(
+      const result = await photo_exercise_store.create_new_photo(
         route.params.id_exercise,
         new_photo.value
       );
 
-      const photos = await photo_exercise_store.find_all_photos_of_exercise(
-        route.params.id_exercise
-      );
+      if (result) {
+        photos_of_exercise.value = [
+          ...(await photo_exercise_store.find_all_photos_of_exercise(
+            route.params.id_exercise
+          )),
+        ];
+      }
 
       photos_of_exercise.value = photos.resource;
-
-      data_is_loaded.value = true;
 
       open_snackbar.value = false;
 
@@ -785,11 +740,10 @@ async function on_photo_change(event) {
 
       new_photo.value = new FormData();
     } catch (err) {
+
       error.value = err.response.data.resource.message;
 
       new_photo.value = new FormData();
-
-      data_is_loaded.value = true;
     }
   }
 }
@@ -798,6 +752,11 @@ async function on_photo_change(event) {
 async function create_new_repetition_set() {
   const new_set = {
     id_exercise: route.params.id_exercise,
+    id_set:
+      sets_of_exercise.value.length > 0
+        ? sets_of_exercise.value[sets_of_exercise.value.length - 1].id_set +
+          1
+        : 1,
     weight: 0.0,
     rest_after_set: "0 minutes 0 seconds",
     set_order:
@@ -809,19 +768,24 @@ async function create_new_repetition_set() {
     quantity: 0,
   };
 
-  await set_store.create_new_set(new_set);
+  const result = await set_store.create_new_set(new_set);
 
-  const sets = await set_store.find_all_sets_of_exercise(
-    route.params.id_exercise
-  );
-
-  sets_of_exercise.value = sets.resource;
+  if (result) {
+    sets_of_exercise.value = [
+      ...(await set_store.find_all_sets_of_exercise(route.params.id_exercise)),
+    ];
+  }
 }
 
 /*Function that creates a new time set */
 async function create_new_time_set() {
   const new_set = {
     id_exercise: route.params.id_exercise,
+    id_set:
+      sets_of_exercise.value.length > 0
+        ? sets_of_exercise.value[sets_of_exercise.value.length - 1].id_set +
+          1
+        : 1,
     weight: 0.0,
     rest_after_set: "0 minutes 0 seconds",
     set_order:
@@ -833,19 +797,19 @@ async function create_new_time_set() {
     quantity: "0 minutes 30 seconds",
   };
 
-  await set_store.create_new_set(new_set);
+  const result = await set_store.create_new_set(new_set);
 
-  const sets = await set_store.find_all_sets_of_exercise(
-    route.params.id_exercise
-  );
-
-  sets_of_exercise.value = sets.resource;
+  if (result) {
+    sets_of_exercise.value = [
+      ...(await set_store.find_all_sets_of_exercise(route.params.id_exercise)),
+    ];
+  }
 }
 
 /*Watchers */
 
 /*Watcher updates the assigned muscle groups of the exercise as appropiate */
-watch(muscle_groups_of_exercise, async (new_muscle_group, old_muscle_group) => {
+watch(muscle_groups_of_exercise, (new_muscle_group, old_muscle_group) => {
   if (old_muscle_group && new_muscle_group.length > old_muscle_group.length) {
     const assignment = {
       id_exercise: route.params.id_exercise,
@@ -853,7 +817,7 @@ watch(muscle_groups_of_exercise, async (new_muscle_group, old_muscle_group) => {
         new_muscle_group[new_muscle_group.length - 1].id_muscle_group,
     };
 
-    await muscle_group_store.assign_muscle_group_to_exercise(assignment);
+    muscle_group_store.assign_muscle_group_to_exercise(assignment);
   } else if (old_muscle_group) {
     let new_array = [];
 
@@ -869,7 +833,7 @@ watch(muscle_groups_of_exercise, async (new_muscle_group, old_muscle_group) => {
 
     old_array.forEach(async (id) => {
       if (!new_array.includes(id)) {
-        await muscle_group_store.unassigned_muscle_group_from_exercise(
+        muscle_group_store.unassigned_muscle_group_from_exercise(
           id,
           route.params.id_exercise
         );
@@ -882,51 +846,44 @@ watch(muscle_groups_of_exercise, async (new_muscle_group, old_muscle_group) => {
 /*Gets and set certain data of the exercise before view is mounted */
 onBeforeMount(async () => {
   try {
-    data_is_loaded.value = false;
+    exercise_info.value = {
+      ...(await exercise_store.find_specific_exercise(
+        route.params.id_exercise
+      )),
+    };
 
-    const specific_exercise = await exercise_store.find_specific_exercise(
-      route.params.id_exercise
-    );
-
-    exercise_info.value = specific_exercise.resource;
-
-    rest_time.value = exercise_info.value.time_after_exercise;
+    rest_time.value = { ...exercise_info.value.time_after_exercise };
 
     fix_rest_time();
 
     exercise_info.value.created_at =
       exercise_info.value.created_at.split("T")[0];
 
-    const muscle_group =
-      await muscle_group_store.find_muscle_groups_of_exercise(
+    muscle_groups_of_exercise.value = [
+      ...(await muscle_group_store.find_muscle_groups_of_exercise(
         route.params.id_exercise
-      );
+      )),
+    ];
 
-    muscle_groups_of_exercise.value = muscle_group.resource;
+    muscle_groups_available.value = [
+      ...(await muscle_group_store.find_all_muscle_groups()),
+    ];
 
-    const all_muscle_groups = await muscle_group_store.find_all_muscle_groups();
+    routines_of_exercise.value = [
+      ...(await routine_store.find_routines_of_exercise(
+        route.params.id_exercise
+      )),
+    ];
 
-    muscle_groups_available.value = all_muscle_groups.resource;
+    photos_of_exercise.value = [
+      ...(await photo_exercise_store.find_all_photos_of_exercise(
+        route.params.id_exercise
+      )),
+    ];
 
-    const routines = await routine_store.find_routines_of_exercise(
-      route.params.id_exercise
-    );
-
-    routines_of_exercise.value = routines.resource;
-
-    const photos = await photo_exercise_store.find_all_photos_of_exercise(
-      route.params.id_exercise
-    );
-
-    photos_of_exercise.value = photos.resource;
-
-    const sets = await set_store.find_all_sets_of_exercise(
-      route.params.id_exercise
-    );
-
-    sets_of_exercise.value = sets.resource;
-
-    data_is_loaded.value = true;
+    sets_of_exercise.value = [
+      ...(await set_store.find_all_sets_of_exercise(route.params.id_exercise)),
+    ];
   } catch (err) {
     error.value = err.response.data.resource.message;
   }

@@ -20,13 +20,7 @@
           input_variant="outlined"
           v-model="new_exercise.exercise_name"
           input_label="Exercise name"
-          v-if="data_is_loaded"
         />
-        <v-skeleton-loader
-          type="heading"
-          color="card"
-          v-else
-        ></v-skeleton-loader>
       </div>
       <!-- Exercise description input -->
       <div>
@@ -36,13 +30,14 @@
           input_variant="outlined"
           v-model="new_exercise.description"
           input_label="Description"
-          v-if="data_is_loaded"
         />
-        <v-skeleton-loader type="image" color="card" v-else></v-skeleton-loader>
       </div>
       <!-- Error component -->
       <ErrorComponent v-if="error" :error_component_message="error" />
-      <div class="exercise-section__form__options" v-if="data_is_loaded">
+      <div
+        class="exercise-section__form__options"
+        v-if="new_exercise.intensity"
+      >
         <!-- Create exercise section options intensity -->
         <div>
           <p class="label">Intensity</p>
@@ -80,10 +75,7 @@
           color="card"
         ></v-skeleton-loader>
       </div>
-      <div
-        class="exercise-section__form__gallery d-flex flex-column"
-        v-if="data_is_loaded"
-      >
+      <div class="exercise-section__form__gallery d-flex flex-column">
         <!-- Create exercise section gallery title and options -->
         <span class="d-flex align-center label"
           ><p class="label">Gallery</p>
@@ -124,6 +116,7 @@
           <v-carousel-item
             v-for="(photo, index) in choosed_photos"
             :src="photo"
+            :key="index"
           >
             <CheckboxComponent
               :checkbox_value="index"
@@ -143,12 +136,8 @@
           @change="on_photo_change"
         />
       </div>
-      <v-skeleton-loader type="image" color="card" v-else></v-skeleton-loader>
       <!-- Rest time -->
-      <div
-        class="exercise-section__form__rest-time d-flex flex-column"
-        v-if="data_is_loaded"
-      >
+      <div class="exercise-section__form__rest-time d-flex flex-column">
         <p class="label">Rest time</p>
         <div class="d-flex justify-center">
           <!-- Create exercise section rest time inputs -->
@@ -190,18 +179,7 @@
           </div>
         </div>
       </div>
-      <div
-        class="exercise-section__form__rest-time d-flex align-center justify-center"
-        v-else
-      >
-        <v-skeleton-loader type="image" color="card"></v-skeleton-loader>
-        <v-skeleton-loader type="image" color="card"></v-skeleton-loader>
-        <v-skeleton-loader type="image" color="card"></v-skeleton-loader>
-      </div>
-      <div
-        class="exercise-section__form__sets d-flex flex-column"
-        v-if="data_is_loaded"
-      >
+      <div class="exercise-section__form__sets d-flex flex-column">
         <!-- Create exercise section sets title and options -->
         <span class="d-flex align-center label"
           ><p class="label">Sets</p>
@@ -365,8 +343,6 @@ const form = ref(null);
 
 const file_input = ref(null);
 
-const data_is_loaded = ref(false);
-
 const show_loader = ref(false);
 
 const new_exercise = ref({
@@ -385,7 +361,9 @@ const choosed_muscle_groups = ref([
   { id_muscle_group: 1, name_muscle_group: "Global" },
 ]);
 
-const muscle_groups_available = ref(null);
+const last_id_set = ref(0);
+
+const muscle_groups_available = ref([]);
 
 const created_sets = ref([]);
 
@@ -426,11 +404,11 @@ async function create_exercise() {
 
       const last_id = await exercise_store.find_last_id_exercise();
 
-      await create_sets(last_id.resource);
+      create_sets(last_id);
 
-      await assign_muscle_groups(last_id.resource);
+      assign_muscle_groups(last_id);
 
-      upload_photos(last_id.resource);
+      upload_photos(last_id);
 
       show_loader.value = false;
 
@@ -513,11 +491,7 @@ function create_new_time_set() {
 
 /*Function that selects all sets of the exercise*/
 function select_all_sets() {
-  selected_sets.value = [];
-
-  created_sets.value.forEach((set) => {
-    selected_sets.value.push(set);
-  });
+  selected_sets.value = [...created_sets.value];
 }
 
 /*Function that changes the set's order*/
@@ -602,10 +576,10 @@ async function on_photo_change(event) {
 }
 
 /*Function that assignes muscle groups to an exercise*/
-async function assign_muscle_groups(id_exercise) {
+function assign_muscle_groups(id_exercise) {
   try {
-    choosed_muscle_groups.value.forEach(async (muscle_group) => {
-      await muscle_group_store.assign_muscle_group_to_exercise({
+    choosed_muscle_groups.value.forEach((muscle_group) => {
+      muscle_group_store.assign_muscle_group_to_exercise({
         id_exercise: id_exercise,
         id_muscle_group: muscle_group.id_muscle_group,
       });
@@ -631,12 +605,14 @@ function upload_photos(id_exercise) {
 }
 
 /*Function that associate the sets created to the exercise*/
-async function create_sets(id_exercise) {
+function create_sets(id_exercise) {
   try {
     created_sets.value.forEach(async (set) => {
       let new_set = { ...set };
 
       new_set.id_exercise = id_exercise;
+
+      new_set.id_set = last_id_set.value ? last_id_set.value : 1;
 
       new_set.rest_after_set = `${set.rest_after_set.minutes} minutes ${set.rest_after_set.seconds} seconds`;
 
@@ -644,7 +620,9 @@ async function create_sets(id_exercise) {
         new_set.quantity = `${new_set.quantity.minutes} minutes ${new_set.quantity.seconds} seconds`;
       }
 
-      await set_store.create_new_set(new_set);
+      set_store.create_new_set(new_set);
+
+      last_id_set.value = new_set.id_set + 1;
     });
   } catch (err) {
     error.value = err.response.data.resource.message;
@@ -655,15 +633,13 @@ async function create_sets(id_exercise) {
 /*Gets and set certain data of the exercise before view is mounted */
 onBeforeMount(async () => {
   try {
-    data_is_loaded.value = false;
-
-    const all_muscle_groups = await muscle_group_store.find_all_muscle_groups();
-
-    muscle_groups_available.value = all_muscle_groups.resource;
+    muscle_groups_available.value = [
+      ...(await muscle_group_store.find_all_muscle_groups()),
+    ];
 
     create_new_repetition_set();
 
-    data_is_loaded.value = true;
+    last_id_set.value = await set_store.find_last_id_set();
   } catch (err) {
     error.value = err.response.data.resource.message;
   }

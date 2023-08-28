@@ -7,7 +7,7 @@
     max-height="200"
     ripple
     @click="go_to_specific_routine()"
-    v-if="data_is_loaded"
+    v-if="!error"
   >
     <!-- Routine card first part -->
     <v-card-item>
@@ -46,14 +46,7 @@
         <v-icon
           icon="fa-solid fa-play"
           class="play_button"
-          @click.stop="
-            router.push({
-              name: 'PlayRoutine',
-              params: {
-                id_routine: routine_card_data.id_routine,
-              },
-            })
-          "
+          @click.stop="play_routine"
         ></v-icon>
       </v-card-subtitle>
     </v-card-item>
@@ -79,43 +72,53 @@
     </div>
   </v-card>
   <!-- Routine card component when data is not loaded yet -->
-  <v-skeleton-loader type="card" v-else color="card"></v-skeleton-loader>
+  <v-card
+    color="card"
+    variant="elevated"
+    elevation="24"
+    max-height="200"
+    ripple
+    class="d-flex justify-center align-center retry"
+    v-else="error"
+  >
+    <ButtonComponent
+      @click="retry"
+      button-prepend-icon="fa-solid fa-arrow-rotate-left"
+      button-label="retry"
+    />
+  </v-card>
 </template>
 
 <script setup>
 //Imports
-import { ref, onBeforeMount, computed, watch } from "vue";
+import { ref, onBeforeMount, computed } from "vue";
 import { useDayStore } from "../stores/day_store";
-import { useExerciseStore } from "../stores/exercise_store";
 import { useRoutineStore } from "../stores/routine_store";
 import router from "../router";
-import { VSkeletonLoader } from "vuetify/labs/VSkeletonLoader";
 import { capitalized_first_character } from "../utils/utils_functions";
+import ButtonComponent from "@/components/ButtonComponent.vue";
 
 //Variables
 const day_store = useDayStore();
-
-const exercise_store = useExerciseStore();
 
 const routine_store = useRoutineStore();
 
 const props = defineProps({
   routine_card_data: Object,
-  routine_card_current_page: Number,
 });
 
-const data_is_loaded = ref(false);
+const error = ref(false);
 
-const amount_exercises = ref(null);
+const amount_exercises = ref(0);
 
-const next_day = ref(null);
+const next_day = ref("");
 
 const is_routine_favorite = ref({
-  is_favorite: null,
+  is_favorite: false,
 });
 
 const preparation_time = computed(() => {
-  const time_before_start = props.routine_card_data.time_before_start;
+  const time_before_start = {...props.routine_card_data.time_before_start};
 
   let time = "";
 
@@ -142,22 +145,11 @@ const preparation_time = computed(() => {
 
 //Methods
 
-/*Function that sets the next day to do the routine */
-const get_days_and_set_next_day = async () => {
-  const days = await day_store.find_days_of_routine(
-    props.routine_card_data.id_routine
-  );
-
-  next_day.value = get_routine_day_status(days.resource);
-};
-
 /*Function that gets the amount of exercises that the routine has */
 const get_amount_exercises = async () => {
-  const exercises = await exercise_store.find_exercises_of_routine(
+  amount_exercises.value = await routine_store.find_amount_exercises_of_routine(
     props.routine_card_data.id_routine
   );
-
-  amount_exercises.value = exercises.resource.length;
 };
 
 /**
@@ -208,11 +200,11 @@ function get_routine_day_status(routine_days) {
 }
 
 /*Function that changes the favorite status of a routine */
-async function change_favorite() {
+function change_favorite() {
   is_routine_favorite.value.is_favorite =
     !is_routine_favorite.value.is_favorite;
 
-  await routine_store.update_specific_routine(
+ routine_store.update_specific_routine(
     props.routine_card_data.id_routine,
     is_routine_favorite.value
   );
@@ -220,15 +212,23 @@ async function change_favorite() {
 
 /*Function that obtain certain data of the routine */
 async function get_routine_data() {
-  data_is_loaded.value = false;
+  try {
+    is_routine_favorite.value.is_favorite = props.routine_card_data.is_favorite;
 
-  is_routine_favorite.value.is_favorite = props.routine_card_data.is_favorite;
+    get_amount_exercises();
 
-  await get_amount_exercises();
+    next_day.value = get_routine_day_status(
+      await day_store.find_days_of_routine(props.routine_card_data.id_routine)
+    );
+  } catch (err) {
+    error.value = true;
+  }
+}
 
-  await get_days_and_set_next_day();
+function retry() {
+  error.value = false;
 
-  data_is_loaded.value = true;
+ get_routine_data();
 }
 
 /*Function that takes you to a specific page of the routine*/
@@ -239,24 +239,25 @@ function go_to_specific_routine() {
   });
 }
 
-//Watchers
-
-/*Watcher that is responsible for updating
-the data of the routine every time it detects
-a change in the props*/
-watch(props, async () => {
-  await get_routine_data();
-});
+/*Function that handles play of a routine*/
+function play_routine() {
+  if (amount_exercises.value > 0) {
+    router.push({
+      name: "PlayRoutine",
+      params: {
+        id_routine: routine_card_data.id_routine,
+      },
+    });
+  }
+}
 
 //LifeHooks
 
 /*Lifehook in charge of obtaining certain data
 from the routine before mounting the component
 and enabling the main card when the data is loaded */
-onBeforeMount(async () => {
-  is_routine_favorite.value.is_favorite = props.routine_card_data.is_favorite;
-
-  await get_routine_data();
+onBeforeMount(() => {
+  get_routine_data();
 });
 </script>
 
@@ -264,7 +265,7 @@ onBeforeMount(async () => {
 //Routine card's style
 .v-card {
   //Color
-  color: rgb(var(--v-theme-text))!important;
+  color: rgb(var(--v-theme-text)) !important;
   //Size
   width: 100%;
   //Font
@@ -317,8 +318,8 @@ onBeforeMount(async () => {
   //Routine card last part
   .card_last_item {
     //Color
-    background-color: rgb(var(--v-theme-text))!important;
-    color: rgb(var(--v-theme-background_color))!important;
+    background-color: rgb(var(--v-theme-text)) !important;
+    color: rgb(var(--v-theme-background_color)) !important;
     //Font style
     font-size: 14px;
 
@@ -335,8 +336,6 @@ onBeforeMount(async () => {
   }
 }
 
-
-
 //Loading card style
 #loading {
   //Spacing
@@ -350,6 +349,10 @@ onBeforeMount(async () => {
 
   //Size
   max-width: auto;
+}
+
+.retry {
+  padding: 30px;
 }
 
 //Media queries
