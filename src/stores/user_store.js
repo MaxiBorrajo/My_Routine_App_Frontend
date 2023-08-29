@@ -99,7 +99,7 @@ export const useUserStore = defineStore("user", () => {
    */
   async function forgot_password(data) {
     try {
-      const result = await axios.delete("/user/forgot_password", data);
+      const result = await axios.post("/user/forgot_password", data);
 
       return result.data.success;
     } catch (error) {
