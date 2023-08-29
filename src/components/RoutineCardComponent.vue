@@ -245,7 +245,7 @@ function play_routine() {
     router.push({
       name: "PlayRoutine",
       params: {
-        id_routine: routine_card_data.id_routine,
+        id_routine: props.routine_card_data.id_routine,
       },
     });
   }

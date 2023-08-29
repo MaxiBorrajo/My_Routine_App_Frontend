@@ -33,6 +33,7 @@
           />
           <InputComponent
             input_label="Confirm password"
+            input_type="password"
             :input_rules="[
               rules.required,
               rules.confirm_password(reset_password_form.password),
