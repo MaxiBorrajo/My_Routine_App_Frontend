@@ -79,7 +79,7 @@ async function forgot_password(data_form) {
 
       open_snackbar.value = true;
     }
-  } catch (error) {
+  } catch (err) {
     error.value = err.response.data.resource.message;
   }
 }
