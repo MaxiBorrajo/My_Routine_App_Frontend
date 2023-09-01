@@ -3,6 +3,7 @@
     class="routine-section d-flex flex-column"
     id="specific_routine_section"
   >
+    <LoaderComponent v-model="show_loader" />
     <!-- Back button -->
     <BackButtonComponent />
     <!-- Routine section first part -->
@@ -56,11 +57,15 @@
       <v-skeleton-loader type="heading" color="card"></v-skeleton-loader>
       <v-skeleton-loader
         type="chip, chip, chip"
-        color="#212121"
+        color="card"
       ></v-skeleton-loader>
     </div>
     <!-- Error component -->
-    <ErrorComponent v-if="error" :error_component_message="error" />
+    <ErrorComponent
+      v-if="error.has_error"
+      :error_component_message="error.error_message"
+      class="error"
+    />
     <!-- Routine section description -->
     <div
       class="routine-section__description d-flex flex-column"
@@ -282,7 +287,7 @@
       <!-- Routine section add exercise -->
       <ButtonComponent
         button-variant="outlined"
-        button-type="text"
+        button-type="button"
         button-prepend-icon="fa-solid fa-list"
         button-label="add exercise"
         button-color="text"
@@ -295,7 +300,7 @@
       <!-- Routine section create new exercise -->
       <ButtonComponent
         button-variant="outlined"
-        button-type="text"
+        button-type="button"
         button-prepend-icon="fa-solid fa-plus"
         button-label="create new exercise"
         button-color="text"
@@ -306,7 +311,7 @@
     <!-- Routine section delete button -->
     <div class="d-flex justify-start" v-if="routine_info">
       <ButtonComponent
-        button-type="text"
+        button-type="button"
         button-prepend-icon="fa-solid fa-trash-can"
         button-label="delete routine"
         class="delete_button"
@@ -407,6 +412,7 @@ import DialogComponent from "@/components/DialogComponent.vue";
 import { VSkeletonLoader } from "vuetify/labs/VSkeletonLoader";
 import router from "../router";
 import { capitalized_first_character } from "../utils/utils_functions";
+import LoaderComponent from "@/components/LoaderComponent.vue";
 
 //Variables
 const route = useRoute();
@@ -429,7 +435,12 @@ const exercises_of_routine = ref(null);
 
 const selected_exercises = ref([]);
 
-const error = ref(null);
+const error = ref({
+  has_error: false,
+  error_message: "",
+});
+
+const show_loader = ref(false);
 
 const show_edit_routine_name = ref(false);
 
@@ -535,7 +546,9 @@ async function change_day(day) {
       ...(await day_store.find_days_of_routine(route.params.id_routine)),
     ];
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
 }
 
@@ -556,7 +569,9 @@ function update_routine() {
 
       show_edit_routine_description.value = false;
     } catch (err) {
-      error.value = err.response.data.resource.message;
+      error.value.has_error = true;
+
+      error.value.error_message = err.response.data.resource.message;
     }
   }
 }
@@ -614,6 +629,8 @@ async function delete_all_selected_exercises() {
       dialog.value.show_dialog = false;
 
       selected_exercises.value.forEach(async (id_exercise) => {
+        show_loader.value = true;
+
         let result = await exercise_store.delete_specific_exercise(id_exercise);
 
         if (result) {
@@ -622,6 +639,8 @@ async function delete_all_selected_exercises() {
               route.params.id_routine
             )),
           ];
+
+          show_loader.value = false;
         }
       });
 
@@ -629,7 +648,11 @@ async function delete_all_selected_exercises() {
 
       open_snackbar.value = true;
     } catch (err) {
-      error.value = err.response.data.resource.message;
+      error.value.has_error = true;
+
+      error.value.error_message = err.response.data.resource.message;
+
+      show_loader.value = false;
     }
   } else {
     open_snackbar.value = false;
@@ -637,6 +660,8 @@ async function delete_all_selected_exercises() {
     snackbar_text.value = "You must select at least one exercise";
 
     open_snackbar.value = true;
+
+    show_loader.value = false;
   }
 }
 
@@ -649,6 +674,8 @@ async function remove_all_selected_exercises() {
       dialog.value.show_dialog = false;
 
       selected_exercises.value.forEach(async (id_exercise) => {
+        show_loader.value = true;
+
         let result = await routine_store.remove_exercise_from_routine(
           id_exercise,
           route.params.id_routine
@@ -660,6 +687,8 @@ async function remove_all_selected_exercises() {
               route.params.id_routine
             )),
           ];
+
+          show_loader.value = false;
         }
       });
 
@@ -667,9 +696,15 @@ async function remove_all_selected_exercises() {
 
       open_snackbar.value = true;
     } catch (err) {
-      error.value = err.response.data.resource.message;
+      error.value.has_error = true;
+
+      error.value.error_message = err.response.data.resource.message;
+
+      show_loader.value = false;
     }
   } else {
+    show_loader.value = false;
+
     open_snackbar.value = false;
 
     snackbar_text.value = "You must select at least one exercise";
@@ -685,6 +720,8 @@ async function add_all_added_exercises(exercises) {
       open_snackbar.value = false;
 
       exercises.forEach(async (exercise) => {
+        show_loader.value = true;
+
         let result = await routine_store.add_exercise_to_routine(
           exercise.id_exercise,
           route.params.id_routine,
@@ -692,8 +729,6 @@ async function add_all_added_exercises(exercises) {
             exercise_order: 0,
           }
         );
-
-        await change_exercise_order();
 
         if (result) {
           exercises_of_routine.value = [
@@ -704,15 +739,27 @@ async function add_all_added_exercises(exercises) {
         }
       });
 
-      exercise_store.selected_exercises = [];
+      show_loader.value = false;
 
       snackbar_text.value = "Exercises added successfully";
 
       open_snackbar.value = true;
-    } catch (err) {
-      error.value = err.response.data.resource.message;
 
       exercise_store.selected_exercises = [];
+
+      exercises_of_routine.value = [
+            ...(await exercise_store.find_exercises_of_routine(
+              route.params.id_routine
+            )),
+          ];
+    } catch (err) {
+      error.value.has_error = true;
+
+      error.value.error_message = err.response.data.resource.message;
+
+      exercise_store.selected_exercises = [];
+
+      show_loader.value = false;
     }
   }
 }
@@ -728,6 +775,8 @@ function select_all_exercises() {
 
 /*Function deletes the actual routine*/
 async function delete_routine() {
+  show_loader.value = true;
+
   try {
     dialog.value.show_dialog = false;
 
@@ -735,8 +784,12 @@ async function delete_routine() {
 
     router.push({ name: "Home" });
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
+
+  show_loader.value = false;
 }
 
 /*Function that changes the order of the exercises of the routine*/
@@ -754,7 +807,11 @@ async function change_exercise_order() {
       );
     });
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
+
+    show_loader.value = false;
   }
 }
 
@@ -774,15 +831,15 @@ function play_routine() {
 /*Gets certain routine's data before view is mounted*/
 onBeforeMount(async () => {
   try {
+    exercises_of_routine.value = [
+      ...(await exercise_store.find_exercises_of_routine(
+        route.params.id_routine
+      )),
+    ];
+
     routine_info.value = {
       ...(await routine_store.find_specific_routine(route.params.id_routine)),
     };
-
-    preparation_time.value = { ...routine_info.value.time_before_start };
-
-    fix_preparation_time();
-
-    routine_info.value.created_at = routine_info.value.created_at.split("T")[0];
 
     days_of_routine.value = [
       ...(await day_store.find_days_of_routine(route.params.id_routine)),
@@ -790,15 +847,17 @@ onBeforeMount(async () => {
 
     days_available.value = [...(await day_store.find_all_days())];
 
-    exercises_of_routine.value = [
-      ...(await exercise_store.find_exercises_of_routine(
-        route.params.id_routine
-      )),
-    ];
+    preparation_time.value = { ...routine_info.value.time_before_start };
+
+    fix_preparation_time();
+
+    routine_info.value.created_at = routine_info.value.created_at.split("T")[0];
 
     await add_all_added_exercises(exercise_store.selected_exercises);
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
 });
 </script>

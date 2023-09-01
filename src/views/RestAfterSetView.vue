@@ -20,7 +20,6 @@
 
 <script setup>
 //Imports
-import { ref } from "vue";
 import CountdownComponent from "@/components/CountdownComponent.vue";
 
 //Variables

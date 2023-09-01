@@ -1,10 +1,11 @@
 <template>
   <section class="routine_section">
+    <LoaderComponent v-model="show_loader" />
     <!-- Routines filter and sort by part -->
     <div class="routine_section__selects d-flex justify-end align-center">
       <ButtonComponent
         button-variant="text"
-        button-type="text"
+        button-type="button"
         button-append-icon="fa-solid fa-caret-down"
         button-label="filter & sorting"
         id="filter_routines_menu_activator"
@@ -23,7 +24,7 @@
         <v-list-item>
           <ButtonComponent
             button-variant="plain"
-            button-type="text"
+            button-type="button"
             button-prepend-icon="fa-solid fa-trash"
             button-label="clear all"
             @click="clear_all_filter_and_sorting"
@@ -106,7 +107,7 @@
       <!-- Create routine button -->
       <ButtonComponent
         button-variant="outlined"
-        button-type="text"
+        button-type="button"
         button-prepend-icon="fa-solid fa-plus"
         button-label="create new routine"
         id="create_routine_button"
@@ -114,7 +115,11 @@
         :button-route="{ name: 'CreateRoutine' }"
       />
       <!-- Error Component -->
-      <ErrorComponent v-if="error" :error_component_message="error" />
+      <ErrorComponent
+        v-if="error.has_error"
+        :error_component_message="error.error_message"
+        class="error"
+      />
       <!-- Routine card component -->
       <RoutineCardComponent
         v-if="paginated_routines().length > 0"
@@ -145,14 +150,20 @@ import ButtonComponent from "@/components/ButtonComponent.vue";
 import PaginationComponent from "@/components/PaginationComponent.vue";
 import RoutineCardComponent from "@/components/RoutineCardComponent.vue";
 import ErrorComponent from "@/components/ErrorComponent.vue";
+import LoaderComponent from "@/components/LoaderComponent.vue";
 
 //Variables
 
 const props = defineProps({
-  main_dashboard_error: String,
+  main_dashboard_error: Object,
 });
 
-const error = ref(props.main_dashboard_error);
+const error = ref({
+  has_error: props.main_dashboard_error.has_error,
+  error_message: props.main_dashboard_error.error_message,
+});
+
+const show_loader = ref(false)
 
 const routine_store = useRoutineStore();
 
@@ -244,6 +255,8 @@ function return_filter_values(choosen_filter) {
 
 /*Function that applies the filters and sorting choosen if there is any */
 async function applied_filters_and_sorting() {
+  show_loader.value = true;
+
   try {
     routines.value = [
       ...(await routine_store.find_routines(
@@ -254,8 +267,12 @@ async function applied_filters_and_sorting() {
       )),
     ];
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
+
+  show_loader.value = false;
 }
 
 /*Function that clears that filters and sorting choosen if there is any*/
@@ -288,7 +305,11 @@ watch(selected_filter, () => {
 from the routines before mounting the component
 and enabling the view when the data is loaded */
 onBeforeMount(async () => {
+  show_loader.value = true;
+
   try {
+    routines.value = [...(await routine_store.find_routines())];
+
     const days = await day_store.find_all_days();
 
     days.forEach((day) => {
@@ -297,11 +318,14 @@ onBeforeMount(async () => {
         value: day.id_day,
       });
     });
-
-    routines.value =  [...(await routine_store.find_routines())];
+    
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
+
+  show_loader.value = false;
 });
 </script>
 

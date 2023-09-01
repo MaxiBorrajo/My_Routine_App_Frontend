@@ -26,7 +26,7 @@ export const useUserStore = defineStore("user", () => {
   async function login(data) {
     try {
       const result = await axios.post("/user/credentials", data);
-
+      
       return result.data.resource;
     } catch (error) {
       throw error;

@@ -20,7 +20,11 @@
           @submit.prevent="reset_password(reset_password_form)"
           class="d-flex flex-column"
         >
-          <p v-if="error" class="error">{{ error }}</p>
+        <ErrorComponent
+            v-if="error.has_error"
+            :error_component_message="error.error_message"
+            class="error"
+          />
           <InputComponent
             input_label="Password"
             :input_rules="[rules.required, rules.password]"
@@ -39,7 +43,7 @@
               rules.confirm_password(reset_password_form.password),
             ]"
           />
-          <ButtonComponent button-label="Submit" button_type="submit" />
+          <ButtonComponent button-label="Submit" button-type="submit" />
         </v-form>
       </v-card-text>
     </v-card>
@@ -70,6 +74,7 @@ import rules from "../utils/rules";
 import ButtonComponent from "@/components/ButtonComponent.vue";
 import InputComponent from "@/components/InputComponent.vue";
 import SnackbarComponent from "@/components/SnackbarComponent.vue";
+import ErrorComponent from "@/components/ErrorComponent.vue";
 
 //Variables
 const route = useRoute();
@@ -80,7 +85,10 @@ const reset_password_form = ref({
 
 const user_store = useUserStore();
 
-const error = ref(null);
+const error = ref({
+  has_error: false,
+  error_message: "",
+});
 
 const form = ref(null);
 
@@ -100,8 +108,10 @@ async function reset_password(data_form) {
 
       open_snackbar.value = true;
     }
-  } catch (error) {
-    error.value = err.response.data.resource.message;
+  } catch (err) {
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
 }
 </script>

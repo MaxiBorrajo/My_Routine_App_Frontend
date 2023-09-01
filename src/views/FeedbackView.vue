@@ -22,7 +22,12 @@
           class="d-flex flex-column"
         >
           <!-- Error component -->
-          <p v-if="error" class="error">{{ error }}</p>
+          <!-- Error Component -->
+          <ErrorComponent
+            v-if="error.has_error"
+            :error_component_message="error.error_message"
+            class="error"
+          />
           <!-- Form area -->
           <TextareaComponent
             :input_clearable="true"
@@ -31,7 +36,7 @@
             :input_rules="[rules.required]"
             v-model="feedback_form.comment"
           />
-          <ButtonComponent button-label="Submit" button_type="submit" />
+          <ButtonComponent button-label="Submit" button-type="submit" />
         </v-form>
       </v-card-text>
     </v-card>
@@ -54,6 +59,7 @@ import ButtonComponent from "@/components/ButtonComponent.vue";
 import TextareaComponent from "@/components/TextareaComponent.vue";
 import SnackbarComponent from "@/components/SnackbarComponent.vue";
 import BackButtonComponent from "@/components/BackButtonComponent.vue";
+import ErrorComponent from "@/components/ErrorComponent.vue";
 
 //Variables
 const form = ref(null);
@@ -64,7 +70,10 @@ const feedback_form = ref({
 
 const user_store = useUserStore();
 
-const error = ref(null);
+const error = ref({
+  has_error: false,
+  error_message: "",
+});
 
 const open_snackbar = ref(false);
 
@@ -82,8 +91,10 @@ async function send_feedback(data_form) {
 
       open_snackbar.value = true;
     }
-  } catch (error) {
-    error.value = err.response.data.resource.message;
+  } catch (err) {
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
 }
 </script>

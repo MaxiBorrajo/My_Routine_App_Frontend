@@ -1,5 +1,6 @@
 <template>
   <section class="profile-section">
+    <LoaderComponent v-model="show_loader" />
     <!-- Back button -->
     <BackButtonComponent />
     <div class="profile-section__main-content">
@@ -7,7 +8,11 @@
       <h2 class="profile-section__main-content__title">Profile</h2>
       <v-divider></v-divider>
       <!-- Error component -->
-      <ErrorComponent v-if="error" :error_component_message="error" />
+      <ErrorComponent
+        v-if="error.has_error"
+        :error_component_message="error.error_message"
+        class="error"
+      />
       <!-- Profile section form -->
       <v-form
         ref="form"
@@ -216,11 +221,28 @@
             ></v-skeleton-loader>
           </div>
         </div>
-        <ButtonComponent
-          button-label="update profile"
-          button-type="submit"
-          id="submit-button"
-        />
+        <div class="d-flex align-center justify-space-between profile_buttons">
+          <ButtonComponent
+            button-label="update profile"
+            button-type="submit"
+            id="submit-button"
+          />
+          <ButtonComponent
+            button-type="button"
+            button-prepend-icon="fa-solid fa-trash-can"
+            button-label="delete account"
+            class="delete_button"
+            button-color="red"
+            button-variant="outlined"
+            @click="
+              open_dialog(
+                'Confirm delete',
+                `Are you sure you want to delete your account?`,
+                delete_account
+              )
+            "
+          />
+        </div>
       </v-form>
     </div>
     <!-- Snackbar component -->
@@ -228,8 +250,26 @@
       v-model="open_snackbar"
       :snackbar_timeout="5000"
       :snackbar_multiline="true"
-      :snackbar_text="snackbar_text"
+      snackbar_text="Profile updated successfully"
     />
+    <!-- Dialog component -->
+    <v-dialog
+      v-model="dialog.show_dialog"
+      persistent
+      width="auto"
+      scroll-strategy="none"
+    >
+      <DialogComponent
+        :dialog_title="dialog.dialog_title"
+        :dialog_text="dialog.dialog_text"
+        :dialog_yes_button="dialog.dialog_action"
+        :dialog_no_button="
+          () => {
+            dialog.show_dialog = false;
+          }
+        "
+      />
+    </v-dialog>
   </section>
 </template>
 
@@ -238,6 +278,7 @@
 import { ref, onBeforeMount } from "vue";
 import { useUserStore } from "../stores/user_store";
 import rules from "../utils/rules";
+import router from "../router";
 import BackButtonComponent from "@/components/BackButtonComponent.vue";
 import ButtonComponent from "@/components/ButtonComponent.vue";
 import InputComponent from "@/components/InputComponent.vue";
@@ -248,17 +289,20 @@ import RatingComponent from "@/components/RatingComponent.vue";
 import SnackbarComponent from "@/components/SnackbarComponent.vue";
 import TextareaComponent from "@/components/TextareaComponent.vue";
 import { VSkeletonLoader } from "vuetify/labs/VSkeletonLoader";
+import DialogComponent from "@/components/DialogComponent.vue";
+import LoaderComponent from "@/components/LoaderComponent.vue";
 
 //Variables
 const user_info = ref(null);
-
-const data_is_loaded = ref(false);
 
 const new_user_info = ref(new FormData());
 
 const user_store = useUserStore();
 
-const error = ref(null);
+const error = ref({
+  has_error: false,
+  error_message: "",
+});
 
 const form = ref(null);
 
@@ -270,7 +314,14 @@ const open_snackbar = ref(false);
 
 const show_indicator = ref(false);
 
-const snackbar_text = ref("");
+const show_loader = ref(false)
+
+const dialog = ref({
+  show_dialog: false,
+  dialog_title: "",
+  dialog_text: "",
+  dialog_action: null,
+});
 
 //Methods
 
@@ -295,13 +346,14 @@ function on_photo_profile_change(event) {
 
 /*Function that updates the current user's information*/
 async function update_profile() {
+  show_loader.value = true;
+
   const { valid } = await form.value.validate();
 
   if (valid) {
     try {
-      snackbar_text.value = "Updating...";
 
-      open_snackbar.value = true;
+      open_snackbar.value = false;
 
       Object.entries(user_info.value).forEach(([key, value]) => {
         new_user_info.value.append(key, value);
@@ -317,33 +369,81 @@ async function update_profile() {
 
       new_user_info.value = new FormData();
 
-      open_snackbar.value = false;
-
-      snackbar_text.value =
-        "Profile updated successfully";
+      show_loader.value = false;
 
       open_snackbar.value = true;
     } catch (err) {
-      error.value = err.response.data.resource.message;
+      error.value.has_error = true;
+
+      error.value.error_message = err.response.data.resource.message;
+
+      show_loader.value = false;
     }
   }
+
+  
+}
+
+/*Function that deletes current account */
+async function delete_account() {
+  show_loader.value = true;
+
+  try {
+    const result = await user_store.delete_user();
+
+    if (result) {
+      dialog.value.show_dialog = false;
+
+      localStorage.clear();
+
+      router.push({ name: "Home" });
+    }
+  } catch (err) {
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
+  }
+
+  show_loader.value = false;
+}
+
+/**
+ * Function that opens a dialog
+ * @param {Function} dialog_action - Function that dialog will execute is yes button is clicked
+ * @param {String} dialog_text - Dialog's text to show
+ * @param {String} dialog_title - Dialog's title to show
+ */
+function open_dialog(dialog_title, dialog_text, dialog_action) {
+  dialog.value.dialog_title = dialog_title;
+
+  dialog.value.dialog_text = dialog_text;
+
+  dialog.value.dialog_action = dialog_action;
+
+  dialog.value.show_dialog = true;
 }
 
 /*Lifehooks */
 /*Get user's info view is mounted */
 onBeforeMount(async () => {
+  show_loader.value = true;
+
   if (localStorage.getItem("current_user_info")) {
     user_info.value = JSON.parse(localStorage.getItem("current_user_info"));
   } else {
     try {
-      user_info.value = {...await user_store.get_current_user()};
+      user_info.value = { ...(await user_store.get_current_user()) };
     } catch (err) {
-      error.value = err.response.data.resource.message;
+      error.value.has_error = true;
+
+      error.value.error_message = err.response.data.resource.message;
     }
   }
   profile_photo.value = user_info.value.url_profile_photo;
 
   user_info.value.date_birth = user_info.value.date_birth.split("T")[0];
+
+  show_loader.value = false;
 });
 </script>
 
@@ -472,18 +572,21 @@ onBeforeMount(async () => {
       }
     }
   }
+
+  .profile_buttons {
+    margin-top: 50px;
+    #submit-button {
+      margin-top: 10px;
+    }
+    flex-wrap: wrap;
+    gap: 10px;
+  }
 }
 
 //Clarification style
 .clarification {
   //Spacing
   padding: 10px 0;
-}
-
-//Submit button style
-#submit-button {
-  //Margin
-  margin-top: 30px;
 }
 
 //Media queries

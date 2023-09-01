@@ -11,7 +11,7 @@
     <template v-slot:actions v-if="snackbar_has_action">
       <ButtonComponent
         :button-label="snackbar_btn_label"
-        :button_type="snackbar_btn_type"
+        :button-type="snackbar_btn_type"
         @click="snackbar_btn_action"
       />
     </template>

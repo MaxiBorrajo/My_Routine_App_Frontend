@@ -4,7 +4,7 @@
     <div class="main_content d-flex justify-center">
       <router-view v-slot="{ Component }">
         <Transition name="bounce" mode="out-in" appear>
-          <keep-alive :exclude="['SpecificRoutineView', 'SpecificExerciseView', 'MainDashboardView']">
+          <keep-alive :exclude="['PlayRoutineView', 'SpecificRoutineView', 'SpecificExerciseView', 'MainDashboardView', 'ChooseExerciseView']">
             <component :is="Component"></component>
           </keep-alive>
         </Transition>

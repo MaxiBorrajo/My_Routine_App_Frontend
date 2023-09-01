@@ -1,5 +1,6 @@
 <template>
   <section class="exercise_section d-flex flex-column">
+    <LoaderComponent v-model="show_loader" />
     <h2>Choose exercises</h2>
     <v-divider></v-divider>
     <!-- Back button -->
@@ -12,7 +13,7 @@
         <!-- Add exercises button -->
         <ButtonComponent
           button-variant="outlined"
-          button-type="text"
+          button-type="button"
           button-prepend-icon="fa-solid fa-list"
           button-label="add exercises"
           button-color="attention"
@@ -46,7 +47,7 @@
       <!-- Filter button -->
       <ButtonComponent
         button-variant="text"
-        button-type="text"
+        button-type="button"
         button-append-icon="fa-solid fa-caret-down"
         button-label="filter & sorting"
         id="filter_exercise_menu_activator"
@@ -66,7 +67,7 @@
         <v-list-item>
           <ButtonComponent
             button-variant="plain"
-            button-type="text"
+            button-type="button"
             button-prepend-icon="fa-solid fa-trash"
             button-label="clear all"
             @click="clear_all_filter_and_sorting"
@@ -143,13 +144,17 @@
     </v-menu>
     <div class="exercise_section__exercises d-flex flex-column align-center">
       <!-- Error Component -->
-      <ErrorComponent v-if="error" :error_component_message="error" />
+      <ErrorComponent
+        v-if="error.has_error"
+        :error_component_message="error.error_message"
+        class="error"
+      />
       <!-- Exercise card component -->
       <v-list
         base-color="text"
         bg-color="background_color"
         class="d-flex flex-column align-center"
-        v-if="paginated_exercises().length > 0"
+        v-if="paginated_exercises().length > 0 && data_is_loaded"
       >
         <v-list-item
           v-for="exercise in paginated_exercises()"
@@ -164,7 +169,11 @@
         </v-list-item>
       </v-list>
       <!-- No exercise found text -->
-      <h2 v-else id="no_exercises_found" class="text-center">
+      <h2
+        v-else-if="paginated_exercises().length === 0 && data_is_loaded"
+        id="no_exercises_found"
+        class="text-center"
+      >
         No exercise was found
       </h2>
       <PaginationComponent
@@ -190,14 +199,16 @@ import ErrorComponent from "@/components/ErrorComponent.vue";
 import BackButtonComponent from "@/components/BackButtonComponent.vue";
 import CheckboxComponent from "@/components/CheckboxComponent.vue";
 import router from "../router";
+import LoaderComponent from "@/components/LoaderComponent.vue";
 
 //Variables
 
-const props = defineProps({
-  main_dashboard_error: String,
+const error = ref({
+  has_error: false,
+  error_message: "",
 });
 
-const error = ref(props.main_dashboard_error);
+const show_loader = ref(false);
 
 const route = useRoute();
 
@@ -207,13 +218,11 @@ const muscle_group_store = useMuscleGroupStore();
 
 const exercises = ref([]);
 
-const exercises_available_for_routine = ref([]);
-
 const selected_exercises = ref([]);
 
-const current_page = ref(1);
+const data_is_loaded = ref(false);
 
-const send_change_occurred = ref(false);
+const current_page = ref(1);
 
 const sort_by_options = ref([
   {
@@ -322,9 +331,9 @@ function return_filter_values(choosen_filter) {
 
 /*Function that applies the filters and sorting choosen if there is any */
 async function applied_filters_and_sorting() {
-  try {
-    send_change_occurred.value = false;
+  show_loader.value = true;
 
+  try {
     exercises.value = [];
 
     if (route.query.id_routine) {
@@ -348,11 +357,13 @@ async function applied_filters_and_sorting() {
         )),
       ];
     }
-
-    send_change_occurred.value = true;
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
+
+  show_loader.value = false;
 }
 
 /*Function that clears that filters and sorting choosen if there is any*/
@@ -392,16 +403,9 @@ watch(selected_filter, () => {
     from the exercises before mounting the component 
     and enabling the view when the data is loaded */
 onBeforeMount(async () => {
+  show_loader.value = true;
+
   try {
-    const muscle_groups = await muscle_group_store.find_all_muscle_groups();
-
-    muscle_groups.forEach((muscle_group) => {
-      muscle_groups_available.value.push({
-        title: muscle_group.name_muscle_group,
-        value: muscle_group.id_muscle_group,
-      });
-    });
-
     if (route.query.id_routine) {
       exercises.value = [
         ...(await exercise_store.find_exercises_of_routine(
@@ -413,10 +417,27 @@ onBeforeMount(async () => {
       exercises.value = [...(await exercise_store.find_exercises())];
     }
 
+    const muscle_groups = await muscle_group_store.find_all_muscle_groups();
+
+    muscle_groups.forEach((muscle_group) => {
+      muscle_groups_available.value.push({
+        title: muscle_group.name_muscle_group,
+        value: muscle_group.id_muscle_group,
+      });
+    });
+
     selected_exercises.value = exercise_store.selected_exercises;
+
+    data_is_loaded.value = true;
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
+
+    data_is_loaded.value = true;
   }
+
+  show_loader.value = false;
 });
 </script>
 

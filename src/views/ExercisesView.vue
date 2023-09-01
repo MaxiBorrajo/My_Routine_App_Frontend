@@ -1,10 +1,11 @@
 <template>
   <section class="exercise_section">
+    <LoaderComponent v-model="show_loader" />
     <!-- Exercises filter and sort by part -->
     <div class="exercise_section__selects d-flex justify-end align-center">
       <ButtonComponent
         button-variant="text"
-        button-type="text"
+        button-type="button"
         button-append-icon="fa-solid fa-caret-down"
         button-label="filter & sorting"
         id="filter_exercise_menu_activator"
@@ -23,7 +24,7 @@
         <v-list-item>
           <ButtonComponent
             button-variant="plain"
-            button-type="text"
+            button-type="button"
             button-prepend-icon="fa-solid fa-trash"
             button-label="clear all"
             @click="clear_all_filter_and_sorting"
@@ -101,7 +102,7 @@
       <!-- Create exercise button -->
       <ButtonComponent
         button-variant="outlined"
-        button-type="text"
+        button-type="button"
         button-prepend-icon="fa-solid fa-plus"
         button-label="create new exercise"
         id="create_exercise_button"
@@ -109,7 +110,11 @@
         :button-route="{ name: 'CreateExercise' }"
       />
       <!-- Error Component -->
-      <ErrorComponent v-if="error" :error_component_message="error" />
+      <ErrorComponent
+        v-if="error.has_error"
+        :error_component_message="error.error_message"
+        class="error"
+      />
       <!-- Exercise card component -->
       <ExerciseCardComponent
         v-if="paginated_exercises().length > 0"
@@ -140,18 +145,24 @@ import ButtonComponent from "@/components/ButtonComponent.vue";
 import PaginationComponent from "@/components/PaginationComponent.vue";
 import ExerciseCardComponent from "@/components/ExerciseCardComponent.vue";
 import ErrorComponent from "@/components/ErrorComponent.vue";
+import LoaderComponent from "@/components/LoaderComponent.vue";
 
 //Variables
 
 const props = defineProps({
-  main_dashboard_error: String,
+  main_dashboard_error: Object,
 });
 
-const error = ref(props.main_dashboard_error);
+const error = ref({
+  has_error: props.main_dashboard_error.has_error,
+  error_message: props.main_dashboard_error.error_message,
+});
 
 const exercise_store = useExerciseStore();
 
 const muscle_group_store = useMuscleGroupStore();
+
+const show_loader = ref(false)
 
 const exercises = ref([]);
 
@@ -259,6 +270,8 @@ function return_filter_values(choosen_filter) {
 
 /*Function that applies the filters and sorting choosen if there is any */
 async function applied_filters_and_sorting() {
+  show_loader.value = true;
+
   try {
     send_change_occurred.value = false;
 
@@ -273,8 +286,12 @@ async function applied_filters_and_sorting() {
 
     send_change_occurred.value = true;
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
+
+  show_loader.value = false;
 }
 
 /*Function that clears that filters and sorting choosen if there is any*/
@@ -309,7 +326,11 @@ watch(selected_filter, () => {
   from the exercises before mounting the component 
   and enabling the view when the data is loaded */
 onBeforeMount(async () => {
+  show_loader.value = true;
+
   try {
+    exercises.value = [...(await exercise_store.find_exercises())];
+    
     const muscle_groups = await muscle_group_store.find_all_muscle_groups();
 
     muscle_groups.forEach((day) => {
@@ -319,10 +340,14 @@ onBeforeMount(async () => {
       });
     });
 
-    exercises.value = [...(await exercise_store.find_exercises())];
+    
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
+
+  show_loader.value = false;
 });
 </script>
 

@@ -6,6 +6,12 @@
     <div
       class="finished-routine-section__title d-flex align-center justify-center flex-column"
     >
+      <!-- Error Component -->
+      <ErrorComponent
+        v-if="error.has_error"
+        :error_component_message="error.error_message"
+        class="error"
+      />
       <!-- Finished routine view title -->
       <span class="d-flex align-center justify-center"
         ><v-icon icon="fa-solid fa-flag-checkered"></v-icon>
@@ -17,7 +23,7 @@
     <!-- Finished routine view home button -->
     <ButtonComponent
       button-label="Go to home"
-      button-type="text"
+      button-type="button"
       :button_width="250"
       :button_height="60"
       button-prepend-icon="fa-solid fa-house"
@@ -30,8 +36,10 @@
 
 <script setup>
 //Imports
+import { ref } from "vue";
 import ButtonComponent from "@/components/ButtonComponent.vue";
 import { useRoutineStore } from "../stores/routine_store";
+import ErrorComponent from "@/components/ErrorComponent.vue";
 
 //Variables
 
@@ -41,15 +49,26 @@ const props = defineProps({
   routine_info: Object,
 });
 
+const error = ref({
+  has_error: false,
+  error_message: "",
+});
+
 //Methods
 /*Function that updates the usage of a routine*/
 function update_usage() {
-  props.routine_info.usage_routine++;
+  try {
+    props.routine_info.usage_routine++;
 
-  routine_store.update_specific_routine(
-    props.routine_info.id_routine,
-    props.routine_info
-  );
+    routine_store.update_specific_routine(
+      props.routine_info.id_routine,
+      props.routine_info
+    );
+  } catch (err) {
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
+  }
 }
 </script>
 

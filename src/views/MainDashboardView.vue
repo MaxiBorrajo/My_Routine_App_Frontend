@@ -1,5 +1,6 @@
 <template>
   <section class="dashboard_section">
+    <LoaderComponent v-model="show_loader" />
     <!-- Dashboard section -->
     <div>
       <div class="d-flex align-center justify-center dashboard_section__navbar">
@@ -57,7 +58,7 @@
 
 <script setup>
 //Imports
-import { ref, onBeforeMount, onBeforeUpdate } from "vue";
+import { ref, onBeforeMount } from "vue";
 import { useTheme } from "vuetify";
 import router from "../router";
 import { useUserStore } from "../stores/user_store";
@@ -65,6 +66,7 @@ import { useExerciseStore } from "../stores/exercise_store";
 import RoutinesView from "@/views/RoutinesView.vue";
 import ExercisesView from "@/views/ExercisesView.vue";
 import VueCookies from "vue-cookies";
+import LoaderComponent from "@/components/LoaderComponent.vue";
 
 //Variables
 const user_store = useUserStore();
@@ -75,9 +77,14 @@ const theme = useTheme();
 
 const profile_photo = ref("");
 
-const error = ref(null);
+const error = ref({
+  has_error: false,
+  error_message: "",
+});
 
 const tab = ref(null);
+
+const show_loader = ref(false)
 
 //Methods
 
@@ -93,8 +100,9 @@ const get_user_data = async () => {
 
       theme.global.name.value = user.theme;
     } catch (err) {
+      error.value.has_error = true;
 
-      error.value = err.response.data.resource.message;
+      error.value.error_message = err.response.data.resource.message;
     }
   } else {
     const user = JSON.parse(localStorage.getItem("current_user_info"));
@@ -107,6 +115,8 @@ const get_user_data = async () => {
 
 /*Function that allows user to sign out */
 async function sign_out() {
+  show_loader.value = true;
+
   try {
     await user_store.logout();
 
@@ -116,20 +126,21 @@ async function sign_out() {
 
     router.push({ name: "Home" });
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
+
+  show_loader.value = false;
 }
 
 //Watchers
 
 /*Lifehooks */
-onBeforeUpdate(() => {
-  get_user_data();
-});
 
 /*Obtain user's information before mounting the component */
-onBeforeMount(() => {
-  get_user_data();
+onBeforeMount(async () => {
+  await get_user_data();
 
   exercise_store.selected_exercises = [];
 });

@@ -6,6 +6,7 @@
     elevation="24"
     max-height="200"
     ripple
+    v-if="!error"
   >
     <!-- Set main content -->
     <div class="d-flex main_content align-center">
@@ -28,7 +29,7 @@
 
             set_info.weight = set_info.weight ? set_info.weight : 0;
 
-            update_set()
+            update_set();
           "
         ></v-text-field>
         <p>{{ weight_unit }}</p>
@@ -50,6 +51,8 @@
             set_info.quantity = set_info.quantity < 0 ? 0 : set_info.quantity;
 
             set_info.quantity = set_info.quantity ? set_info.quantity : 0;
+
+            update_set()
           "
         ></v-text-field>
       </span>
@@ -111,12 +114,30 @@
       </span>
     </div>
   </v-card>
+  <v-card
+    color="card"
+    variant="elevated"
+    elevation="24"
+    max-height="200"
+    ripple
+    class="d-flex justify-center align-center retry"
+    v-else
+  >
+    <ButtonComponent
+      @click="retry"
+      button-prepend-icon="fa-solid fa-arrow-rotate-left"
+      button-label="retry"
+      button-type="button"
+    />
+  </v-card>
 </template>
 
 <script setup>
 //Imports
 import { ref, onBeforeMount, watch } from "vue";
 import { useSetStore } from "../stores/set_store";
+import ButtonComponent from "@/components/ButtonComponent.vue";
+import { VSkeletonLoader } from "vuetify/labs/VSkeletonLoader";
 
 //Variables
 const props = defineProps({
@@ -130,33 +151,40 @@ const set_store = useSetStore();
 
 const set_info = ref({});
 
-const type = ref('');
+const type = ref("");
 
-const weight_unit = ref('');
+const weight_unit = ref("");
 
 const time_set = ref({});
 
 const rest_time = ref({});
 
+const error = ref(false);
+
 //Methods
 
 /*Function that updates the set's information */
 async function update_set() {
-  if (type.value === "Time") {
-    fix_time(time_set);
+  try {
+    if (type.value === "Time") {
+      fix_time(time_set);
 
-    set_info.value.quantity = `${time_set.value.minutes} minutes ${time_set.value.seconds} seconds`;
+      set_info.value.quantity = `${time_set.value.minutes} minutes ${time_set.value.seconds} seconds`;
+    }
+
+    fix_time(rest_time);
+
+    set_info.value.rest_after_set = `${rest_time.value.minutes} minutes ${rest_time.value.seconds} seconds`;
+
+    await set_store.update_specific_set(
+      set_info.value.id_set,
+      props.set_card_id_exercise,
+      set_info.value
+    );
+  } catch (err) {
+    console.log(err)
+    error.value = true;
   }
-
-  fix_time(rest_time);
-
-  set_info.value.rest_after_set = `${rest_time.value.minutes} minutes ${rest_time.value.seconds} seconds`;
-
-  await set_store.update_specific_set(
-    set_info.value.id_set,
-    props.set_card_id_exercise,
-    set_info.value
-  );
 }
 
 /**
@@ -179,7 +207,6 @@ function fix_time(time) {
 
 /*Function that gets and prepared the set information */
 function get_set_info() {
-
   set_info.value = {
     id_set: props.set_card_data.id_set,
     set_order: props.set_card_data.set_order,
@@ -198,14 +225,22 @@ function get_set_info() {
   type.value = set_info.value.type === "time" ? "Time" : "Repetition";
 
   if (type.value === "Time") {
-    time_set.value = {...set_info.value.quantity};
+    time_set.value = { ...set_info.value.quantity };
 
     fix_time(time_set);
   }
 
-  rest_time.value = {...set_info.value.rest_after_set};
+  rest_time.value = { ...set_info.value.rest_after_set };
 
   fix_time(rest_time);
+}
+
+function retry() {
+  error.value = false;
+
+  get_set_info();
+
+  update_set();
 }
 
 /*Watcher */
@@ -278,5 +313,9 @@ onBeforeMount(() => {
       }
     }
   }
+}
+
+.retry {
+  padding: 30px;
 }
 </style>

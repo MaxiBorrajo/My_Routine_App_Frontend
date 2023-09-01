@@ -118,9 +118,11 @@ let interval_id;
 //Methods
 /*Function that changes the circular progress of the countdown based on the total time*/
 function change_progress() {
-  let value_to_rest = 100 / total_seconds;
+    if (total_seconds > 0) {
+    let value_to_rest = 100 / total_seconds;
 
-  progress.value -= value_to_rest;
+    progress.value -= value_to_rest;
+  }
 }
 
 //Function that change the countdown depending on his progress

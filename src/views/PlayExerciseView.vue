@@ -1,18 +1,26 @@
 <template>
-  <section class="play_exercise_view d-flex align-center justify-center" v-if="data_is_loaded">
+  <section
+    class="play_exercise_view d-flex align-center justify-center"
+  >
     <!-- Play exercise view -->
+    <!-- Error Component -->
+    <ErrorComponent
+      v-if="error.has_error"
+      :error_component_message="error.error_message"
+      class="error"
+    />
     <!-- Time set view -->
     <TimeSetView
       :current_set="current_sets[current_set_index]"
       :exercise_name="current_exercise.exercise_name"
-      v-if="show_set && current_sets[current_set_index].time"
+      v-if="current_sets && show_set && current_sets[current_set_index].time && !current_sets[current_set_index].repetition"
       @set_finished="change_set"
     />
     <!-- Repetition set view -->
     <RepetitionSetView
       :current_set="current_sets[current_set_index]"
       :exercise_name="current_exercise.exercise_name"
-      v-if="show_set && current_sets[current_set_index].repetition"
+      v-if="current_sets && show_set && current_sets[current_set_index].repetition >= 0 && !current_sets[current_set_index].time"
       @set_finished="change_set"
     />
     <!-- Rest after set view -->
@@ -29,6 +37,7 @@
       :exercise_name="current_exercise.exercise_name"
       @rest_finished="start_new_exercise"
     />
+    <LoaderComponent v-model="show_loader" />
   </section>
 </template>
 
@@ -40,6 +49,8 @@ import TimeSetView from "@/views/TimeSetView.vue";
 import RepetitionSetView from "@/views/RepetitionSetView.vue";
 import ExerciseRestView from "@/views/ExerciseRestView.vue";
 import RestAfterSetView from "@/views/RestAfterSetView.vue";
+import ErrorComponent from "@/components/ErrorComponent.vue";
+import LoaderComponent from "@/components/LoaderComponent.vue";
 
 //Variables
 const set_store = useSetStore();
@@ -50,7 +61,7 @@ const props = defineProps({
 
 const emit = defineEmits(["exercise_finished"]);
 
-const current_sets = ref([]);
+const current_sets = ref(null);
 
 const current_set_index = ref(0);
 
@@ -64,17 +75,28 @@ const show_rest_after_set = ref(false);
 
 const show_set = ref(true);
 
-const data_is_loaded = ref(false)
+const error = ref({
+  has_error: false,
+  error_message: "",
+});
+
+const show_loader = ref(false);
 
 //Methods
 
 //Function that gets the sets of the current exercise
 async function get_sets_of_exercise() {
-  current_sets.value = [
-    ...(await set_store.find_all_sets_of_exercise(
-      props.current_exercise.id_exercise
-    )),
-  ];
+  try {
+    current_sets.value = [
+      ...(await set_store.find_all_sets_of_exercise(
+        props.current_exercise.id_exercise
+      )),
+    ];
+  } catch (err) {
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
+  }
 }
 
 //Function that changes the current set
@@ -125,6 +147,12 @@ function start_new_exercise() {
   };
 }
 
+function fix_time(time) {
+  time.value.seconds = time.value.seconds ? time.value.seconds : 0;
+
+  time.value.minutes = time.value.minutes ? time.value.minutes : 0;
+}
+
 //Watchers
 /*Watcher that gets the sets of the current exercise
 when sees a change in the props*/
@@ -136,14 +164,32 @@ watch(props, async () => {
 /*Lifehook that gets the sets of the current exercise and 
 establish the current rests */
 onBeforeMount(async () => {
-  await get_sets_of_exercise();
+  show_loader.value = true;
 
-  rest_after_exercise.value = {...props.current_exercise.time_after_exercise};
+  try {
+    await get_sets_of_exercise();
 
-  rest_after_set.value =
-    {...current_sets.value[current_set_index.value].rest_after_set};
+    if (current_sets.value) {
+      rest_after_exercise.value = {
+        ...props.current_exercise.time_after_exercise,
+      };
 
-  data_is_loaded.value = true;
+      fix_time(rest_after_exercise);
+
+      rest_after_set.value = {
+        ...current_sets.value[current_set_index.value].rest_after_set,
+      };
+
+      fix_time(rest_after_set);
+    }
+  } catch (err) {
+    
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
+  }
+
+  show_loader.value = false;
 });
 </script>
 

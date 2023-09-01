@@ -36,10 +36,15 @@ import LoginView from "@/views/LoginView.vue";
 import RegisterView from "@/views/RegisterView.vue";
 import { useUserStore } from "../stores/user_store";
 import { useTheme } from "vuetify";
+import { useRoute } from "vue-router";
+import VueCookies from "vue-cookies";
+import router from "../router";
 
 //Variables
 
 const current_view = ref("Sign in");
+
+const route = useRoute();
 
 //Methods
 /*Function that gets the current theme */
@@ -79,10 +84,17 @@ async function get_theme() {
 
 //Lifehooks
 
+
 //Lifehook that set the current theme before view render
-onBeforeMount(async() => {
-  await get_theme()
-})
+onBeforeMount(async () => {
+  if (route.query.google_redirect) {
+    VueCookies.set("_is_logged_in", true);
+
+    router.push({ name: "Dashboard" });
+  } else {
+    await get_theme();
+  }
+});
 </script>
 
 <style scoped lang="scss">

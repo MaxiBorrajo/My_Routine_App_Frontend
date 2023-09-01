@@ -33,7 +33,11 @@
         />
       </div>
       <!-- Error component -->
-      <ErrorComponent v-if="error" :error_component_message="error" />
+      <ErrorComponent
+        v-if="error.has_error"
+        :error_component_message="error.error_message"
+        class="error"
+      />
       <div
         class="exercise-section__form__options"
         v-if="new_exercise.intensity"
@@ -248,7 +252,7 @@
         <!-- Create repetition set button -->
         <ButtonComponent
           button-variant="outlined"
-          button-type="text"
+          button-type="button"
           button-prepend-icon="fa-solid fa-hashtag"
           button-label="create new repetition set"
           button-color="text"
@@ -258,7 +262,7 @@
         <!-- Create time set button -->
         <ButtonComponent
           button-variant="outlined"
-          button-type="text"
+          button-type="button"
           button-prepend-icon="fa-solid fa-clock"
           button-label="create new time set"
           button-color="text"
@@ -337,7 +341,10 @@ const photo_exercise_store = usePhotoExerciseStore();
 
 const set_store = useSetStore();
 
-const error = ref(null);
+const error = ref({
+  has_error: false,
+  error_message: "",
+});
 
 const form = ref(null);
 
@@ -392,12 +399,12 @@ const snackbar_text = ref("");
 
 /*Function that updates the current exercise*/
 async function create_exercise() {
+  show_loader.value = true;
+  
   const { valid } = await form.value.validate();
 
   if (valid) {
     try {
-      show_loader.value = true;
-
       new_exercise.value.time_after_exercise = `${rest_time.value.minutes} minutes ${rest_time.value.seconds} seconds`;
 
       await exercise_store.create_new_exercise(new_exercise.value);
@@ -410,15 +417,15 @@ async function create_exercise() {
 
       upload_photos(last_id);
 
-      show_loader.value = false;
-
       router.push({ name: "Home" });
     } catch (err) {
-      error.value = err.response.data.resource.message;
+      error.value.has_error = true;
 
-      show_loader.value = false;
+      error.value.error_message = err.response.data.resource.message;
     }
   }
+
+  show_loader.value = false;
 }
 
 /*Function that fix rest time object by changing seconds, minutes and hours attributes
@@ -585,7 +592,9 @@ function assign_muscle_groups(id_exercise) {
       });
     });
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
 }
 
@@ -600,7 +609,9 @@ function upload_photos(id_exercise) {
       new_photo.value = new FormData();
     });
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
 }
 
@@ -625,7 +636,9 @@ function create_sets(id_exercise) {
       last_id_set.value = new_set.id_set + 1;
     });
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
 }
 
@@ -641,7 +654,9 @@ onBeforeMount(async () => {
 
     last_id_set.value = await set_store.find_last_id_set();
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
 });
 </script>

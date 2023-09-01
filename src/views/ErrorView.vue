@@ -13,7 +13,7 @@
     <div class="d-flex justify-center">
       <ButtonComponent
         button-label="go back home"
-        button_type="text"
+        button-type="button"
         button-prepend-icon="fa-solid fa-house"
         button-color="text"
         :button-route="{ name: 'Home' }"

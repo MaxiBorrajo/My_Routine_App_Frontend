@@ -7,7 +7,7 @@
     max-height="200"
     ripple
     @click="go_to_specific_exercise()"
-    v-if="!error"
+    v-if="!error && data_is_loaded"
   >
     <!-- Exercise card first part -->
     <v-card-item>
@@ -84,7 +84,7 @@
     max-height="200"
     ripple
     class="d-flex justify-center align-center retry"
-    v-else="error"
+    v-else-if="error"
   >
     <ButtonComponent
       @click="retry"
@@ -92,6 +92,11 @@
       button-label="retry"
     />
   </v-card>
+  <VSkeletonLoader
+    type="card"
+    color="card"
+    v-else-if="!data_is_loaded"
+  ></VSkeletonLoader>
 </template>
 
 <script setup>
@@ -103,6 +108,7 @@ import { useSetStore } from "../stores/set_store";
 import { capitalized_first_character } from "../utils/utils_functions";
 import router from "../router";
 import ButtonComponent from "@/components/ButtonComponent.vue";
+import { VSkeletonLoader } from "vuetify/labs/VSkeletonLoader";
 
 //Variables
 const exercise_store = useExerciseStore();
@@ -116,6 +122,8 @@ const props = defineProps({
 });
 
 const error = ref(false);
+
+const data_is_loaded = ref(false);
 
 const amount_routines = ref(0);
 
@@ -220,25 +228,29 @@ function change_favorite() {
 }
 
 /*Function that obtain certain data of the exercise */
-function get_exercise_data() {
+async function get_exercise_data() {
+  data_is_loaded.value = false;
+
   try {
     is_exercise_favorite.value.is_favorite =
       props.exercise_card_data.is_favorite;
 
-    get_amount_routines();
+    await get_amount_routines();
 
-    get_amount_muscle_groups();
+    await get_amount_muscle_groups();
 
-    get_amounts_of_sets();
+    await get_amounts_of_sets();
+
+    data_is_loaded.value = true;
   } catch (err) {
     error.value = true;
   }
 }
 
-function retry() {
+async function retry() {
   error.value = false;
 
-  get_exercise_data();
+  await get_exercise_data();
 }
 
 /*Function that takes you to a specific page of the exercise*/
@@ -256,8 +268,8 @@ function go_to_specific_exercise() {
 /*Lifehook in charge of obtaining certain data 
   from the exercise before mounting the component 
   and enabling the main card when the data is loaded */
-onBeforeMount(() => {
-  get_exercise_data();
+onBeforeMount(async () => {
+  await get_exercise_data();
 });
 </script>
 

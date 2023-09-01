@@ -31,7 +31,11 @@
         <v-skeleton-loader type="heading" color="card"></v-skeleton-loader>
       </div>
       <!-- Error component -->
-      <ErrorComponent v-if="error" :error_component_message="error" />
+      <ErrorComponent
+        v-if="error.has_error"
+        :error_component_message="error.error_message"
+        class="error"
+      />
       <!-- Routine section description -->
       <div
         class="routine-section__description d-flex flex-column"
@@ -175,7 +179,6 @@
           </v-tooltip>
         </span>
         <!-- Routine section list of exercises -->
-        {{ choosed_exercises }}
         <v-list
           base-color="text"
           bg-color="background_color"
@@ -215,7 +218,7 @@
         <!-- Routine section add exercise -->
         <ButtonComponent
           button-variant="outlined"
-          button-type="text"
+          button-type="button"
           button-prepend-icon="fa-solid fa-list"
           button-label="add exercise"
           button-color="text"
@@ -314,7 +317,10 @@ const choosed_exercises = ref([]);
 
 const selected_exercises = ref([]);
 
-const error = ref(null);
+const error = ref({
+  has_error: false,
+  error_message: "",
+});
 
 const dialog = ref({
   show_dialog: false,
@@ -345,7 +351,9 @@ async function assign_days() {
       day_store.assign_day_to_routine(data);
     });
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
 }
 
@@ -357,13 +365,14 @@ async function assign_exercises() {
     const last_id = await routine_store.find_last_id_routine();
 
     choosed_exercises.value.forEach((exercise, index) => {
-      
       routine_store.add_exercise_to_routine(exercise.id_exercise, last_id, {
         exercise_order: index + 1,
       });
     });
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
 }
 
@@ -371,12 +380,12 @@ async function assign_exercises() {
  * Function that creates a routine
  */
 async function create_routine() {
+  show_loader.value = true;
+
   const { valid } = await form.value.validate();
 
   if (valid) {
     try {
-      show_loader.value = true;
-
       new_routine.value.time_before_start = `${preparation_time.value.minutes} minutes ${preparation_time.value.seconds} seconds`;
 
       const result = await routine_store.create_new_routine(new_routine.value);
@@ -387,13 +396,15 @@ async function create_routine() {
         assign_days();
       }
 
-      show_loader.value = false;
-
       router.push({ name: "Home" });
     } catch (err) {
-      error.value = err.response.data.resource.message;
+      error.value.has_error = true;
+
+      error.value.error_message = err.response.data.resource.message;
     }
   }
+
+  show_loader.value = false;
 }
 
 /*Function that fixes a interval object by changing seconds, minutes and hours attributes*/
@@ -465,7 +476,9 @@ onBeforeMount(async () => {
   try {
     days_available.value = [...(await day_store.find_all_days())];
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
 });
 </script>

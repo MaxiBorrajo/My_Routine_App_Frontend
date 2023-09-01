@@ -13,7 +13,7 @@
       v-for="(option, index) in button_toggle_options"
       :button-icon="button_toggle_icons[index]"
       :value="option"
-      button-type="text"
+      button-type="button"
     />
     <!-- Buttons without icons -->
     <ButtonComponent
@@ -21,7 +21,7 @@
       v-for="option in button_toggle_options"
       :value="option"
       :button-label="option"
-      button-type="text"
+      button-type="button"
     />
   </v-btn-toggle>
 </template>

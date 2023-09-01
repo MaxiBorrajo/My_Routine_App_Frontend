@@ -7,7 +7,7 @@
     max-height="200"
     ripple
     @click="go_to_specific_routine()"
-    v-if="!error"
+    v-if="!error && data_is_loaded"
   >
     <!-- Routine card first part -->
     <v-card-item>
@@ -79,14 +79,20 @@
     max-height="200"
     ripple
     class="d-flex justify-center align-center retry"
-    v-else="error"
+    v-else-if="error"
   >
     <ButtonComponent
       @click="retry"
       button-prepend-icon="fa-solid fa-arrow-rotate-left"
       button-label="retry"
+      button-type="button"
     />
   </v-card>
+  <VSkeletonLoader
+    type="card"
+    color="card"
+    v-else-if="!data_is_loaded"
+  ></VSkeletonLoader>
 </template>
 
 <script setup>
@@ -97,6 +103,7 @@ import { useRoutineStore } from "../stores/routine_store";
 import router from "../router";
 import { capitalized_first_character } from "../utils/utils_functions";
 import ButtonComponent from "@/components/ButtonComponent.vue";
+import { VSkeletonLoader } from "vuetify/labs/VSkeletonLoader";
 
 //Variables
 const day_store = useDayStore();
@@ -109,6 +116,8 @@ const props = defineProps({
 
 const error = ref(false);
 
+const data_is_loaded = ref(false);
+
 const amount_exercises = ref(0);
 
 const next_day = ref("");
@@ -118,7 +127,7 @@ const is_routine_favorite = ref({
 });
 
 const preparation_time = computed(() => {
-  const time_before_start = {...props.routine_card_data.time_before_start};
+  const time_before_start = { ...props.routine_card_data.time_before_start };
 
   let time = "";
 
@@ -204,7 +213,7 @@ function change_favorite() {
   is_routine_favorite.value.is_favorite =
     !is_routine_favorite.value.is_favorite;
 
- routine_store.update_specific_routine(
+  routine_store.update_specific_routine(
     props.routine_card_data.id_routine,
     is_routine_favorite.value
   );
@@ -212,23 +221,29 @@ function change_favorite() {
 
 /*Function that obtain certain data of the routine */
 async function get_routine_data() {
+  data_is_loaded.value = false;
+
   try {
     is_routine_favorite.value.is_favorite = props.routine_card_data.is_favorite;
 
-    get_amount_exercises();
+    await get_amount_exercises();
 
     next_day.value = get_routine_day_status(
       await day_store.find_days_of_routine(props.routine_card_data.id_routine)
     );
+    
+    data_is_loaded.value = true;
   } catch (err) {
     error.value = true;
   }
+
+  
 }
 
 function retry() {
   error.value = false;
 
- get_routine_data();
+  get_routine_data();
 }
 
 /*Function that takes you to a specific page of the routine*/
@@ -256,8 +271,10 @@ function play_routine() {
 /*Lifehook in charge of obtaining certain data
 from the routine before mounting the component
 and enabling the main card when the data is loaded */
-onBeforeMount(() => {
-  get_routine_data();
+onBeforeMount(async () => {
+  await get_routine_data();
+
+  
 });
 </script>
 

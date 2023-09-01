@@ -49,7 +49,7 @@
 
 <script setup>
 //Imports
-import { ref,computed } from "vue";
+import { ref,computed, onBeforeMount } from "vue";
 import router from "../router/index";
 
 //Variables
@@ -76,7 +76,9 @@ function go_home() {
 }
 
 /*Lifehooks */
-
+onBeforeMount(()=>{
+  console.log('me activo')
+})
 </script>
 
 <style scoped lang="scss">

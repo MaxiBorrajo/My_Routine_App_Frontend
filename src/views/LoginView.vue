@@ -3,12 +3,12 @@
     <v-form
       ref="form"
       @submit.prevent="login(login_form)"
-      :class="error ? 'login_form_with_error' : 'login_form_without_error'"
+      :class="error.has_error ? 'login_form_with_error' : 'login_form_without_error'"
     >
       <!-- Error component -->
       <ErrorComponent
-        v-if="error"
-        :error_component_message="error"
+        v-if="error.has_error"
+        :error_component_message="error.error_message"
         class="error"
       />
       <!-- Main form -->
@@ -35,12 +35,12 @@
       <div class="login_buttons d-flex flex-column">
         <ButtonComponent
           button-label="Sign in"
-          button_type="submit"
+          button-type="submit"
           button-prepend-icon="fa-solid fa-right-to-bracket"
         />
         <ButtonComponent
           button-label="Sign in with google"
-          button_type="text"
+          button-type="button"
           :button-href="link_google"
           button-prepend-icon="fa-brands fa-google"
           button-color="#4185F4"
@@ -55,6 +55,7 @@
       :snackbar_multiline="true"
       snackbar_text="You must first login"
     />
+    <LoaderComponent v-model="show_loader" />
   </section>
 </template>
 
@@ -68,6 +69,7 @@ import ButtonComponent from "@/components/ButtonComponent.vue";
 import InputComponent from "@/components/InputComponent.vue";
 import ErrorComponent from "@/components/ErrorComponent.vue";
 import SnackbarComponent from "@/components/SnackbarComponent.vue";
+import LoaderComponent from "@/components/LoaderComponent.vue";
 import VueCookies from "vue-cookies";
 
 //Variables
@@ -82,32 +84,40 @@ const user_store = useUserStore();
 
 const show_password = ref(false);
 
-const error = ref(null);
+const error = ref({
+  has_error: false,
+  error_message: "",
+});
 
 const open_snackbar = ref(false);
 
-const link_google = import.meta.env.VITE_URL_GOOGLE
+const link_google = import.meta.env.VITE_URL_GOOGLE;
+
+const show_loader = ref(false);
 
 /*Function that allows to login*/
 async function login(data_form) {
+  show_loader.value = true;
+
   const { valid } = await form.value.validate();
+
   if (valid) {
     try {
       const result = await user_store.login(data_form);
 
-      localStorage.setItem(
-        "current_user_info",
-        JSON.stringify(result)
-      );
+      localStorage.setItem("current_user_info", JSON.stringify(result));
 
       VueCookies.set("_is_logged_in", true);
 
       router.push({ name: "Dashboard" });
     } catch (err) {
-      console.log(err)
-      error.value = err.response.data.resource.message;
+      error.value.has_error = true;
+
+      error.value.error_message = err.response.data.resource.message;
     }
   }
+
+  show_loader.value = false;
 }
 
 //Lifehooks

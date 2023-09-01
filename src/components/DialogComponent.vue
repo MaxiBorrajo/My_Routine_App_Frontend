@@ -9,14 +9,14 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <ButtonComponent
-        button-type="text"
+        button-type="button"
         button-label="Yes"
         @click="dialog_yes_button"
         color="attention"
         button-variant="tonal"
       />
       <ButtonComponent
-        button-type="text"
+        button-type="button"
         button-label="No"
         @click="dialog_no_button"
         color="attention"

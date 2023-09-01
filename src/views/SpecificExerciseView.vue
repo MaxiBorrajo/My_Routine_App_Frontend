@@ -1,5 +1,6 @@
 <template>
   <section>
+    <LoaderComponent v-model="show_loader" />
     <!-- Specific exercise section -->
     <div class="exercise-section d-flex flex-column">
       <!-- Back button -->
@@ -48,9 +49,17 @@
           <v-chip label>Created at: {{ exercise_info.created_at }}</v-chip>
         </div>
       </div>
-      
+      <!-- Exercise section first part title loader-->
+      <div class="exercise-section__first-part d-flex flex-column" v-else>
+        <v-skeleton-loader type="heading" color="card"></v-skeleton-loader>
+        <v-skeleton-loader type="chip" color="card"></v-skeleton-loader>
+      </div>
       <!-- Error component -->
-      <ErrorComponent v-if="error" :error_component_message="error" />
+      <ErrorComponent
+        v-if="error.has_error"
+        :error_component_message="error.error_message"
+        class="error"
+      />
       <!-- Specific exercise section description -->
       <div
         class="exercise-section__description d-flex flex-column"
@@ -93,7 +102,10 @@
           </p>
         </div>
       </div>
-
+      <!-- Exercise section description loader -->
+      <div class="exercise-section__description d-flex flex-column" v-else>
+        <v-skeleton-loader type="paragraph" color="card"></v-skeleton-loader>
+      </div>
       <!-- Specific exercise section options -->
       <div
         class="exercise-section__options"
@@ -126,7 +138,13 @@
           ></v-select>
         </div>
       </div>
-
+      <div
+        class="exercise-section__options d-flex align-center justify-space-between"
+        v-else
+      >
+        <v-skeleton-loader type="paragraph" color="card"></v-skeleton-loader>
+        <v-skeleton-loader type="heading" color="card"></v-skeleton-loader>
+      </div>
       <!-- Specific exercise section gallery-->
       <div
         class="exercise-section__gallery d-flex flex-column"
@@ -188,7 +206,9 @@
           @change="on_photo_change"
         />
       </div>
-
+      <div class="exercise-section__gallery d-flex flex-column" v-else>
+        <v-skeleton-loader type="image" color="card"></v-skeleton-loader>
+      </div>
       <!-- Specific exercise section routines -->
       <div
         class="exercise-section__routines d-flex flex-column"
@@ -213,6 +233,12 @@
           </v-slide-group-item>
         </v-slide-group>
         <h2 v-else class="text-center">No routines found</h2>
+      </div>
+      <div class="exercise-section__routines d-flex flex-column" v-else>
+        <v-skeleton-loader
+          type="chip, chip, chip"
+          color="card"
+        ></v-skeleton-loader>
       </div>
       <!-- Specific exercise section rest time-->
       <div
@@ -262,7 +288,13 @@
           </div>
         </div>
       </div>
-
+      <div
+        class="exercise-section__rest-time d-flex align-center justify-center"
+        v-else
+      >
+        <v-skeleton-loader type="image" color="card"></v-skeleton-loader>
+        <v-skeleton-loader type="image" color="card"></v-skeleton-loader>
+      </div>
       <!-- Specific exercise section sets -->
       <div
         class="exercise-section__sets d-flex flex-column"
@@ -340,12 +372,17 @@
         </v-list>
         <h2 v-else class="text-center">Sets not found</h2>
       </div>
+      <div class="exercise-section__sets d-flex flex-column" v-else>
+        <v-skeleton-loader type="heading" color="card"></v-skeleton-loader>
+        <v-skeleton-loader type="heading" color="card"></v-skeleton-loader>
+        <v-skeleton-loader type="heading" color="card"></v-skeleton-loader>
+      </div>
       <!-- Specific exercise section sets buttons -->
       <div class="d-flex exercise-section__create-buttons">
         <!-- Specific exercise section sets create set button -->
         <ButtonComponent
           button-variant="outlined"
-          button-type="text"
+          button-type="button"
           button-prepend-icon="fa-solid fa-hashtag"
           button-label="create new repetition set"
           button-color="text"
@@ -354,7 +391,7 @@
         <p class="label">or</p>
         <ButtonComponent
           button-variant="outlined"
-          button-type="text"
+          button-type="button"
           button-prepend-icon="fa-solid fa-clock"
           button-label="create new time set"
           button-color="text"
@@ -365,7 +402,7 @@
       <!-- Specific exercise section sets delete exercise button -->
       <div class="d-flex justify-start" v-if="exercise_info">
         <ButtonComponent
-          button-type="text"
+          button-type="button"
           button-prepend-icon="fa-solid fa-trash-can"
           button-label="delete exercise"
           class="delete_button"
@@ -451,6 +488,8 @@ import DialogComponent from "@/components/DialogComponent.vue";
 import RadioButtonComponent from "@/components/RadioButtonComponent.vue";
 import router from "../router";
 import { capitalized_first_character } from "../utils/utils_functions";
+import { VSkeletonLoader } from "vuetify/labs/VSkeletonLoader";
+import LoaderComponent from "@/components/LoaderComponent.vue";
 
 //Variables
 
@@ -466,7 +505,12 @@ const photo_exercise_store = usePhotoExerciseStore();
 
 const set_store = useSetStore();
 
-const error = ref(null);
+const error = ref({
+  has_error: false,
+  error_message: "",
+});
+
+const show_loader = ref(false);
 
 const file_input = ref(null);
 
@@ -522,7 +566,9 @@ function update_exercise() {
 
       show_edit_exercise_description.value = false;
     } catch (err) {
-      error.value = err.response.data.resource.message;
+      error.value.has_error = true;
+
+      error.value.error_message = err.response.data.resource.message;
     }
   }
 }
@@ -565,6 +611,8 @@ function change_intensity(value) {
 
 /*Function that deletes the exercise */
 async function delete_exercise() {
+  show_loader.value = true;
+
   try {
     dialog.value.show_dialog = false;
 
@@ -574,8 +622,12 @@ async function delete_exercise() {
   } catch (err) {
     dialog.value.show_dialog = false;
 
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
+
+  show_loader.value = false;
 }
 
 /*Function that selects all sets of the exercise*/
@@ -608,7 +660,9 @@ async function change_set_order() {
       ];
     });
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
 }
 
@@ -621,7 +675,12 @@ async function delete_all_selected_sets() {
       dialog.value.show_dialog = false;
 
       selected_sets.value.forEach(async (id_set) => {
-        await set_store.delete_specific_set(id_set, route.params.id_exercise);
+        show_loader.value = true;
+
+        let result = await set_store.delete_specific_set(
+          id_set,
+          route.params.id_exercise
+        );
 
         sets_of_exercise.value = [
           ...(await set_store.find_all_sets_of_exercise(
@@ -630,6 +689,10 @@ async function delete_all_selected_sets() {
         ];
 
         change_set_order();
+
+        if (result) {
+          show_loader.value = false;
+        }
       });
 
       open_snackbar.value = false;
@@ -640,9 +703,15 @@ async function delete_all_selected_sets() {
 
       selected_sets.value = [];
     } catch (err) {
-      error.value = err.response.data.resource.message;
+      error.value.has_error = true;
+
+      error.value.error_message = err.response.data.resource.message;
+
+      show_loader.value = false;
     }
   } else {
+    show_loader.value = false;
+
     open_snackbar.value = false;
 
     snackbar_text.value = "You must select at least one set";
@@ -660,7 +729,9 @@ async function delete_all_selected_photos() {
       dialog.value.show_dialog = false;
 
       selected_photos.value.forEach(async (public_id) => {
-        await photo_exercise_store.delete_photo_of_exercise(
+        show_loader.value = true;
+
+        let result = await photo_exercise_store.delete_photo_of_exercise(
           public_id,
           route.params.id_exercise
         );
@@ -670,6 +741,10 @@ async function delete_all_selected_photos() {
             route.params.id_exercise
           )),
         ];
+
+        if (result) {
+          show_loader.value = false;
+        }
       });
 
       open_snackbar.value = false;
@@ -680,11 +755,15 @@ async function delete_all_selected_photos() {
 
       selected_photos.value = [];
     } catch (err) {
-      error.value = err.response.data.resource.message;
+      error.value.has_error = true;
 
-      data_is_loaded.value = true;
+      error.value.error_message = err.response.data.resource.message;
+
+      show_loader.value = false;
     }
   } else {
+    show_loader.value = false;
+
     open_snackbar.value = false;
 
     snackbar_text.value = "You must select at least one set";
@@ -712,6 +791,8 @@ function open_dialog(dialog_title, dialog_text, dialog_action) {
 /* Function that uploads a photo and associate it with the exercise*/
 async function on_photo_change(event) {
   if (event.target.files[0]) {
+    show_loader.value = true;
+
     try {
       const file = event.target.files[0];
 
@@ -730,8 +811,6 @@ async function on_photo_change(event) {
         ];
       }
 
-      photos_of_exercise.value = photos.resource;
-
       open_snackbar.value = false;
 
       snackbar_text.value = "Photo uploaded successfully";
@@ -740,105 +819,137 @@ async function on_photo_change(event) {
 
       new_photo.value = new FormData();
     } catch (err) {
+      
+      error.value.has_error = true;
 
-      error.value = err.response.data.resource.message;
+      error.value.error_message = err.response.data.resource.message;
 
       new_photo.value = new FormData();
     }
+
+    show_loader.value = false;
   }
 }
 
 /*Function that changes the intensity of the exercise */
 async function create_new_repetition_set() {
-  const new_set = {
-    id_exercise: route.params.id_exercise,
-    id_set:
-      sets_of_exercise.value.length > 0
-        ? sets_of_exercise.value[sets_of_exercise.value.length - 1].id_set +
-          1
-        : 1,
-    weight: 0.0,
-    rest_after_set: "0 minutes 0 seconds",
-    set_order:
-      sets_of_exercise.value.length > 0
-        ? sets_of_exercise.value[sets_of_exercise.value.length - 1].set_order +
-          1
-        : 1,
-    type: "repetition",
-    quantity: 0,
-  };
+  show_loader.value = true;
 
-  const result = await set_store.create_new_set(new_set);
+  try {
+    const new_set = {
+      id_exercise: route.params.id_exercise,
+      id_set:
+        sets_of_exercise.value.length > 0
+          ? sets_of_exercise.value[sets_of_exercise.value.length - 1].id_set + 1
+          : 1,
+      weight: 0.0,
+      rest_after_set: "0 minutes 0 seconds",
+      set_order:
+        sets_of_exercise.value.length > 0
+          ? sets_of_exercise.value[sets_of_exercise.value.length - 1]
+              .set_order + 1
+          : 1,
+      type: "repetition",
+      quantity: 0,
+    };
 
-  if (result) {
-    sets_of_exercise.value = [
-      ...(await set_store.find_all_sets_of_exercise(route.params.id_exercise)),
-    ];
+    const result = await set_store.create_new_set(new_set);
+
+    if (result) {
+      sets_of_exercise.value = [
+        ...(await set_store.find_all_sets_of_exercise(
+          route.params.id_exercise
+        )),
+      ];
+    }
+  } catch (err) {
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
+
+  show_loader.value = false;
 }
 
 /*Function that creates a new time set */
 async function create_new_time_set() {
-  const new_set = {
-    id_exercise: route.params.id_exercise,
-    id_set:
-      sets_of_exercise.value.length > 0
-        ? sets_of_exercise.value[sets_of_exercise.value.length - 1].id_set +
-          1
-        : 1,
-    weight: 0.0,
-    rest_after_set: "0 minutes 0 seconds",
-    set_order:
-      sets_of_exercise.value.length > 0
-        ? sets_of_exercise.value[sets_of_exercise.value.length - 1].set_order +
-          1
-        : 1,
-    type: "time",
-    quantity: "0 minutes 30 seconds",
-  };
+  show_loader.value = true;
 
-  const result = await set_store.create_new_set(new_set);
+  try {
+    const new_set = {
+      id_exercise: route.params.id_exercise,
+      id_set:
+        sets_of_exercise.value.length > 0
+          ? sets_of_exercise.value[sets_of_exercise.value.length - 1].id_set + 1
+          : 1,
+      weight: 0.0,
+      rest_after_set: "0 minutes 0 seconds",
+      set_order:
+        sets_of_exercise.value.length > 0
+          ? sets_of_exercise.value[sets_of_exercise.value.length - 1]
+              .set_order + 1
+          : 1,
+      type: "time",
+      quantity: "0 minutes 30 seconds",
+    };
 
-  if (result) {
-    sets_of_exercise.value = [
-      ...(await set_store.find_all_sets_of_exercise(route.params.id_exercise)),
-    ];
+    const result = await set_store.create_new_set(new_set);
+
+    if (result) {
+      sets_of_exercise.value = [
+        ...(await set_store.find_all_sets_of_exercise(
+          route.params.id_exercise
+        )),
+      ];
+    }
+  } catch (err) {
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
+
+  show_loader.value = false;
 }
 
 /*Watchers */
 
 /*Watcher updates the assigned muscle groups of the exercise as appropiate */
 watch(muscle_groups_of_exercise, (new_muscle_group, old_muscle_group) => {
-  if (old_muscle_group && new_muscle_group.length > old_muscle_group.length) {
-    const assignment = {
-      id_exercise: route.params.id_exercise,
-      id_muscle_group:
-        new_muscle_group[new_muscle_group.length - 1].id_muscle_group,
-    };
+  try {
+    if (old_muscle_group && new_muscle_group.length > old_muscle_group.length) {
+      const assignment = {
+        id_exercise: route.params.id_exercise,
+        id_muscle_group:
+          new_muscle_group[new_muscle_group.length - 1].id_muscle_group,
+      };
 
-    muscle_group_store.assign_muscle_group_to_exercise(assignment);
-  } else if (old_muscle_group) {
-    let new_array = [];
+      muscle_group_store.assign_muscle_group_to_exercise(assignment);
+    } else if (old_muscle_group) {
+      let new_array = [];
 
-    let old_array = [];
+      let old_array = [];
 
-    new_muscle_group.forEach((muscle_group) => {
-      new_array.push(muscle_group.id_muscle_group);
-    });
+      new_muscle_group.forEach((muscle_group) => {
+        new_array.push(muscle_group.id_muscle_group);
+      });
 
-    old_muscle_group.forEach((muscle_group) => {
-      old_array.push(muscle_group.id_muscle_group);
-    });
+      old_muscle_group.forEach((muscle_group) => {
+        old_array.push(muscle_group.id_muscle_group);
+      });
 
-    old_array.forEach(async (id) => {
-      if (!new_array.includes(id)) {
-        muscle_group_store.unassigned_muscle_group_from_exercise(
-          id,
-          route.params.id_exercise
-        );
-      }
-    });
+      old_array.forEach(async (id) => {
+        if (!new_array.includes(id)) {
+          muscle_group_store.unassigned_muscle_group_from_exercise(
+            id,
+            route.params.id_exercise
+          );
+        }
+      });
+    }
+  } catch (err) {
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
 });
 
@@ -846,6 +957,16 @@ watch(muscle_groups_of_exercise, (new_muscle_group, old_muscle_group) => {
 /*Gets and set certain data of the exercise before view is mounted */
 onBeforeMount(async () => {
   try {
+    photos_of_exercise.value = [
+      ...(await photo_exercise_store.find_all_photos_of_exercise(
+        route.params.id_exercise
+      )),
+    ];
+
+    sets_of_exercise.value = [
+      ...(await set_store.find_all_sets_of_exercise(route.params.id_exercise)),
+    ];
+    
     exercise_info.value = {
       ...(await exercise_store.find_specific_exercise(
         route.params.id_exercise
@@ -875,17 +996,11 @@ onBeforeMount(async () => {
       )),
     ];
 
-    photos_of_exercise.value = [
-      ...(await photo_exercise_store.find_all_photos_of_exercise(
-        route.params.id_exercise
-      )),
-    ];
-
-    sets_of_exercise.value = [
-      ...(await set_store.find_all_sets_of_exercise(route.params.id_exercise)),
-    ];
+    
   } catch (err) {
-    error.value = err.response.data.resource.message;
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
   }
 });
 </script>

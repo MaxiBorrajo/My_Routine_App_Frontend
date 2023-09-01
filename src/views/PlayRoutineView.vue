@@ -1,9 +1,14 @@
 <template>
   <section class="play-routine-section">
+    <!-- Error Component -->
+    <ErrorComponent
+      v-if="error.has_error"
+      :error_component_message="error.error_message"
+      class="error"
+    />
     <!-- Loader component -->
-    <LoaderComponent v-if="data_is_not_loaded" v-model="data_is_not_loaded" />
     <section
-      v-else
+      v-else-if="routine && exercises_of_routine && !error.has_error"
       class="play-routine-section__views d-flex justify-center align-center"
     >
       <!-- Play routine view -->
@@ -26,6 +31,7 @@
         :routine_info="routine"
       />
     </section>
+    <LoaderComponent v-model="show_loader" />
   </section>
 </template>
 
@@ -39,6 +45,7 @@ import LoaderComponent from "@/components/LoaderComponent.vue";
 import { useRoute } from "vue-router";
 import { useExerciseStore } from "../stores/exercise_store";
 import { useRoutineStore } from "../stores/routine_store";
+import ErrorComponent from "@/components/ErrorComponent.vue";
 
 //Variables
 const show_prepare_view = ref(true);
@@ -53,19 +60,26 @@ const exercise_store = useExerciseStore();
 
 const routine_store = useRoutineStore();
 
-const data_is_not_loaded = ref(true);
+const routine = ref(null);
 
-const routine = ref({});
-
-const exercises_of_routine = ref([]);
+const exercises_of_routine = ref(null);
 
 const current_exercise_index = ref(0);
+
+const error = ref({
+  has_error: false,
+  error_message: "",
+});
+
+const show_loader = ref(false);
 
 //Function that starts the exercise view
 function start_exercise() {
   show_prepare_view.value = false;
 
   show_exercise_view.value = true;
+
+  console.log( show_exercise_view.value)
 }
 
 //Function that changes from one exercise to another or starts the routine finished view
@@ -83,17 +97,25 @@ function change_exercise() {
 /*Liefehooks in charge of getting the routine information,
 the exercises of the routine and renders the view */
 onBeforeMount(async () => {
-  routine.value = {
-    ...(await routine_store.find_specific_routine(route.params.id_routine)),
-  };
+  show_loader.value = true;
 
-  exercises_of_routine.value = [
-    ...(await exercise_store.find_exercises_of_routine(
-      route.params.id_routine
-    )),
-  ];
+  try {
+    routine.value = {
+      ...(await routine_store.find_specific_routine(route.params.id_routine)),
+    };
 
-  data_is_not_loaded.value = false;
+    exercises_of_routine.value = [
+      ...(await exercise_store.find_exercises_of_routine(
+        route.params.id_routine
+      )),
+    ];
+  } catch (err) {
+    error.value.has_error = true;
+
+    error.value.error_message = err.response.data.resource.message;
+  }
+
+  show_loader.value = false;
 });
 </script>
 
