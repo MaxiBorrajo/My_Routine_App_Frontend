@@ -237,11 +237,13 @@
             button-variant="outlined"
             :button-disabled="user_info.email === 'user@gmail.com'"
             @click="
-              open_dialog(
-                'Confirm delete',
-                `Are you sure you want to delete your account?`,
-                delete_account
-              )
+              if (user_info.email !== 'user@gmail.com') {
+                open_dialog(
+                  'Confirm delete',
+                  `Are you sure you want to delete your account?`,
+                  delete_account
+                );
+              }
             "
           />
         </div>
