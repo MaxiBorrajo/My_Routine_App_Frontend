@@ -195,6 +195,8 @@ onBeforeMount(async () => {
       exercise_finished();
     }
   } catch (err) {
+    console.log(err)
+    
     error.value.has_error = true;
 
     error.value.error_message = err.response.data.resource.message;
