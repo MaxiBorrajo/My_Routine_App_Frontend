@@ -291,6 +291,7 @@ import TextareaComponent from "@/components/TextareaComponent.vue";
 import { VSkeletonLoader } from "vuetify/labs/VSkeletonLoader";
 import DialogComponent from "@/components/DialogComponent.vue";
 import LoaderComponent from "@/components/LoaderComponent.vue";
+import VueCookies from "vue-cookies";
 
 //Variables
 const user_info = ref(null);
@@ -314,7 +315,7 @@ const open_snackbar = ref(false);
 
 const show_indicator = ref(false);
 
-const show_loader = ref(false)
+const show_loader = ref(false);
 
 const dialog = ref({
   show_dialog: false,
@@ -352,7 +353,6 @@ async function update_profile() {
 
   if (valid) {
     try {
-
       open_snackbar.value = false;
 
       Object.entries(user_info.value).forEach(([key, value]) => {
@@ -380,8 +380,6 @@ async function update_profile() {
       show_loader.value = false;
     }
   }
-
-  
 }
 
 /*Function that deletes current account */
@@ -395,6 +393,8 @@ async function delete_account() {
       dialog.value.show_dialog = false;
 
       localStorage.clear();
+
+      VueCookies.remove("_is_logged_in");
 
       router.push({ name: "Home" });
     }
