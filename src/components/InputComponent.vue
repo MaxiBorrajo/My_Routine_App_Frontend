@@ -16,6 +16,7 @@
     :type="input_type"
     :variant="input_variant"
     :autofocus="input_auto_focus"
+    :readonly="input_readonly"
   ></v-text-field>
 </template>
 
@@ -37,6 +38,7 @@ const props = defineProps({
   input_rules: Array,
   input_variant: String,
   input_auto_focus: Boolean,
+  input_readonly: Boolean,
 });
 </script>
 

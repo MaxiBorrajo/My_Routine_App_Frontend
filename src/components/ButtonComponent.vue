@@ -12,6 +12,7 @@
     :prepend-icon="buttonPrependIcon"
     :width="button_width"
     :height="button_height"
+    :disabled="button_disabled"
     class="d-flex justify-center align-center"
     >{{ buttonLabel }}</v-btn
   >
@@ -31,6 +32,7 @@ const props = defineProps({
   buttonVariant: String,
   button_width: Number,
   button_height: Number,
+  button_disabled: Boolean,
 });
 </script>
 

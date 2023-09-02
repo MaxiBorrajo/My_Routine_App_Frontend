@@ -73,6 +73,7 @@
             <p>Email</p>
             <InputComponent
               :input_rules="[rules.required, rules.email]"
+              :input_readonly="user_info.email === 'user@gmail.com'"
               v-model="user_info.email"
             />
           </div>
@@ -234,6 +235,7 @@
             class="delete_button"
             button-color="red"
             button-variant="outlined"
+            :button-disabled="user_info.email === 'user@gmail.com'"
             @click="
               open_dialog(
                 'Confirm delete',
