@@ -46,6 +46,7 @@ import { useRoute } from "vue-router";
 import { useExerciseStore } from "../stores/exercise_store";
 import { useRoutineStore } from "../stores/routine_store";
 import ErrorComponent from "@/components/ErrorComponent.vue";
+import router from "../router";
 
 //Variables
 const show_prepare_view = ref(true);
@@ -78,8 +79,6 @@ function start_exercise() {
   show_prepare_view.value = false;
 
   show_exercise_view.value = true;
-
-  console.log( show_exercise_view.value)
 }
 
 //Function that changes from one exercise to another or starts the routine finished view
@@ -109,6 +108,10 @@ onBeforeMount(async () => {
         route.params.id_routine
       )),
     ];
+
+    if (exercises_of_routine.value && exercises_of_routine.value.length === 0) {
+      router.push({ name: "Dashboard" });
+    }
   } catch (err) {
     error.value.has_error = true;
 

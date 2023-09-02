@@ -152,6 +152,7 @@ import RoutineCardComponent from "@/components/RoutineCardComponent.vue";
 import ErrorComponent from "@/components/ErrorComponent.vue";
 import LoaderComponent from "@/components/LoaderComponent.vue";
 
+
 //Variables
 
 const props = defineProps({

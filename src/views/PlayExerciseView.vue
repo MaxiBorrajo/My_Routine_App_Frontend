@@ -1,7 +1,5 @@
 <template>
-  <section
-    class="play_exercise_view d-flex align-center justify-center"
-  >
+  <section class="play_exercise_view d-flex align-center justify-center">
     <!-- Play exercise view -->
     <!-- Error Component -->
     <ErrorComponent
@@ -13,14 +11,24 @@
     <TimeSetView
       :current_set="current_sets[current_set_index]"
       :exercise_name="current_exercise.exercise_name"
-      v-if="current_sets && show_set && current_sets[current_set_index].time && !current_sets[current_set_index].repetition"
+      v-if="
+        current_sets &&
+        show_set &&
+        current_sets[current_set_index].time &&
+        !current_sets[current_set_index].repetition
+      "
       @set_finished="change_set"
     />
     <!-- Repetition set view -->
     <RepetitionSetView
       :current_set="current_sets[current_set_index]"
       :exercise_name="current_exercise.exercise_name"
-      v-if="current_sets && show_set && current_sets[current_set_index].repetition >= 0 && !current_sets[current_set_index].time"
+      v-if="
+        current_sets &&
+        show_set &&
+        current_sets[current_set_index].repetition >= 0 &&
+        !current_sets[current_set_index].time
+      "
       @set_finished="change_set"
     />
     <!-- Rest after set view -->
@@ -169,7 +177,7 @@ onBeforeMount(async () => {
   try {
     await get_sets_of_exercise();
 
-    if (current_sets.value) {
+    if (current_sets.value && current_sets.value.length > 0) {
       rest_after_exercise.value = {
         ...props.current_exercise.time_after_exercise,
       };
@@ -181,9 +189,14 @@ onBeforeMount(async () => {
       };
 
       fix_time(rest_after_set);
+    } else {
+      show_set.value = false;
+
+      show_rest_after_exercise.value = true;
+
+      exercise_finished();
     }
   } catch (err) {
-    
     error.value.has_error = true;
 
     error.value.error_message = err.response.data.resource.message;
