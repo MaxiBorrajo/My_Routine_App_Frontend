@@ -177,13 +177,13 @@ onBeforeMount(async () => {
   try {
     await get_sets_of_exercise();
 
+    rest_after_exercise.value = {
+      ...props.current_exercise.time_after_exercise,
+    };
+
+    fix_time(rest_after_exercise);
+
     if (current_sets.value && current_sets.value.length > 0) {
-      rest_after_exercise.value = {
-        ...props.current_exercise.time_after_exercise,
-      };
-
-      fix_time(rest_after_exercise);
-
       rest_after_set.value = {
         ...current_sets.value[current_set_index.value].rest_after_set,
       };
