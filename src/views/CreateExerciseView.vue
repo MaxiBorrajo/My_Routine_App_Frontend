@@ -196,7 +196,7 @@
                 @click="
                   open_dialog(
                     'Confirm delete',
-                    'Are you sure you want to delete the selected exercises?',
+                    'Are you sure you want to delete the selected sets?',
                     delete_all_selected_sets
                   )
                 "
