@@ -192,8 +192,6 @@ onBeforeMount(async () => {
     } else {
       show_set.value = false;
 
-      show_rest_after_exercise.value = true;
-
       exercise_finished();
     }
   } catch (err) {
