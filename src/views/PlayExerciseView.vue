@@ -11,24 +11,14 @@
     <TimeSetView
       :current_set="current_sets[current_set_index]"
       :exercise_name="current_exercise.exercise_name"
-      v-if="
-        current_sets &&
-        show_set &&
-        current_sets[current_set_index].time &&
-        !current_sets[current_set_index].repetition
-      "
+      v-if="show_time_set_view"
       @set_finished="change_set"
     />
     <!-- Repetition set view -->
     <RepetitionSetView
       :current_set="current_sets[current_set_index]"
       :exercise_name="current_exercise.exercise_name"
-      v-if="
-        current_sets &&
-        show_set &&
-        current_sets[current_set_index].repetition >= 0 &&
-        !current_sets[current_set_index].time
-      "
+      v-if="show_repetition_set_view"
       @set_finished="change_set"
     />
     <!-- Rest after set view -->
@@ -51,7 +41,7 @@
 
 <script setup>
 //Imports
-import { ref, watch, onBeforeMount } from "vue";
+import { ref, watch, onBeforeMount, onErrorCaptured, computed } from "vue";
 import { useSetStore } from "../stores/set_store";
 import TimeSetView from "@/views/TimeSetView.vue";
 import RepetitionSetView from "@/views/RepetitionSetView.vue";
@@ -82,6 +72,26 @@ const show_rest_after_exercise = ref(false);
 const show_rest_after_set = ref(false);
 
 const show_set = ref(true);
+
+const show_repetition_set_view = computed(() => {
+  return (
+    show_set.value &&
+    current_sets.value &&
+    current_sets.value.length > 0 &&
+    current_sets.value[current_set_index.value].repetition >= 0 &&
+    !current_sets.value[current_set_index.value].time
+  );
+});
+
+const show_time_set_view = computed(() => {
+  return (
+    show_set.value &&
+    current_sets.value &&
+    current_sets.value.length > 0 &&
+    current_sets.value[current_set_index.value].time &&
+    !current_sets.value[current_set_index.value].repetition
+  );
+});
 
 const error = ref({
   has_error: false,
@@ -169,6 +179,7 @@ watch(props, async () => {
 });
 
 //Lifehooks
+
 /*Lifehook that gets the sets of the current exercise and 
 establish the current rests */
 onBeforeMount(async () => {
@@ -192,11 +203,11 @@ onBeforeMount(async () => {
     } else {
       show_set.value = false;
 
+      show_rest_after_exercise.value = true;
+
       exercise_finished();
     }
   } catch (err) {
-    console.log(err)
-    
     error.value.has_error = true;
 
     error.value.error_message = err.response.data.resource.message;

@@ -118,7 +118,7 @@ let interval_id;
 //Methods
 /*Function that changes the circular progress of the countdown based on the total time*/
 function change_progress() {
-    if (total_seconds > 0) {
+  if (total_seconds > 0) {
     let value_to_rest = 100 / total_seconds;
 
     progress.value -= value_to_rest;
@@ -138,9 +138,12 @@ function change_countdown() {
     countdown.value.minutes--;
 
     countdown.value.seconds = 59;
-  } else if (countdown.value.minutes === 0 && countdown.value.seconds === 4) {
-    countdown_sound.play();
-
+  } else if (countdown.value.minutes === 0 && countdown.value.seconds <= 4) {
+    if (countdown_sound.currentTime === 0) {
+      countdown_sound.play();
+    }else{
+      countdown_sound.currentTime = 4 - countdown.value.seconds
+    }
     countdown.value.seconds--;
   } else {
     countdown.value.seconds--;
