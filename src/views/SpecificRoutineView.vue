@@ -675,20 +675,22 @@ async function remove_all_selected_exercises() {
 
       show_loader.value = true;
 
-      selected_exercises.value.forEach(async (id_exercise) => {
-        await routine_store.remove_exercise_from_routine(
+      selected_exercises.value.forEach(async (id_exercise, index) => {
+        let result = await routine_store.remove_exercise_from_routine(
           id_exercise,
           route.params.id_routine
         );
-      });
 
-      show_loader.value = false;
-      
-      exercises_of_routine.value = [
-        ...(await exercise_store.find_exercises_of_routine(
-          route.params.id_routine
-        )),
-      ];
+        if (index === selected_exercises.value.length - 1 && result) {
+          exercises_of_routine.value = [
+            ...(await exercise_store.find_exercises_of_routine(
+              route.params.id_routine
+            )),
+          ];
+
+          show_loader.value = false;
+        }
+      });
 
       snackbar_text.value = "Exercises removed successfully";
 
