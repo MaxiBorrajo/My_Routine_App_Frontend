@@ -179,6 +179,7 @@ onBeforeMount(async () => {
       position: absolute;
       top: 7px;
       right: 7px;
+      cursor: pointer;
     }
   }
 

@@ -628,12 +628,12 @@ async function delete_all_selected_exercises() {
 
       dialog.value.show_dialog = false;
 
-      selected_exercises.value.forEach(async (id_exercise) => {
-        show_loader.value = true;
+      show_loader.value = true;
 
+      selected_exercises.value.forEach(async (id_exercise, index) => {
         let result = await exercise_store.delete_specific_exercise(id_exercise);
 
-        if (result) {
+        if (index === selected_exercises.value.length - 1 && result) {
           exercises_of_routine.value = [
             ...(await exercise_store.find_exercises_of_routine(
               route.params.id_routine
@@ -719,9 +719,9 @@ async function add_all_added_exercises(exercises) {
     try {
       open_snackbar.value = false;
 
-      exercises.forEach(async (exercise) => {
-        show_loader.value = true;
+      show_loader.value = true;
 
+      exercises.forEach(async (exercise, index) => {
         let result = await routine_store.add_exercise_to_routine(
           exercise.id_exercise,
           route.params.id_routine,
@@ -730,7 +730,7 @@ async function add_all_added_exercises(exercises) {
           }
         );
 
-        if (result) {
+        if (index === exercises.value.length - 1 && result) {
           exercises_of_routine.value = [
             ...(await exercise_store.find_exercises_of_routine(
               route.params.id_routine
@@ -746,12 +746,6 @@ async function add_all_added_exercises(exercises) {
       open_snackbar.value = true;
 
       exercise_store.selected_exercises = [];
-
-      exercises_of_routine.value = [
-        ...(await exercise_store.find_exercises_of_routine(
-          route.params.id_routine
-        )),
-      ];
     } catch (err) {
       error.value.has_error = true;
 
