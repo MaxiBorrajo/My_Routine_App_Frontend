@@ -673,24 +673,22 @@ async function remove_all_selected_exercises() {
 
       dialog.value.show_dialog = false;
 
-      selected_exercises.value.forEach(async (id_exercise) => {
-        show_loader.value = true;
+      show_loader.value = true;
 
-        let result = await routine_store.remove_exercise_from_routine(
+      selected_exercises.value.forEach(async (id_exercise) => {
+        await routine_store.remove_exercise_from_routine(
           id_exercise,
           route.params.id_routine
         );
-
-        if (result) {
-          exercises_of_routine.value = [
-            ...(await exercise_store.find_exercises_of_routine(
-              route.params.id_routine
-            )),
-          ];
-
-          show_loader.value = false;
-        }
       });
+
+      show_loader.value = false;
+      
+      exercises_of_routine.value = [
+        ...(await exercise_store.find_exercises_of_routine(
+          route.params.id_routine
+        )),
+      ];
 
       snackbar_text.value = "Exercises removed successfully";
 
@@ -748,10 +746,10 @@ async function add_all_added_exercises(exercises) {
       exercise_store.selected_exercises = [];
 
       exercises_of_routine.value = [
-            ...(await exercise_store.find_exercises_of_routine(
-              route.params.id_routine
-            )),
-          ];
+        ...(await exercise_store.find_exercises_of_routine(
+          route.params.id_routine
+        )),
+      ];
     } catch (err) {
       error.value.has_error = true;
 
