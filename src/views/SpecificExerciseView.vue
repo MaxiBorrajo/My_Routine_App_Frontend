@@ -647,17 +647,19 @@ async function change_set_order() {
         set_order: index + 1,
       };
 
-      await set_store.update_specific_set(
+      let result = await set_store.update_specific_set(
         set.id_set,
         route.params.id_exercise,
         new_set
       );
 
-      sets_of_exercise.value = [
-        ...(await set_store.find_all_sets_of_exercise(
-          route.params.id_exercise
-        )),
-      ];
+      if (index === sets_of_exercise.value.length - 1 && result) {
+        sets_of_exercise.value = [
+          ...(await set_store.find_all_sets_of_exercise(
+            route.params.id_exercise
+          )),
+        ];
+      }
     });
   } catch (err) {
     error.value.has_error = true;
@@ -674,23 +676,23 @@ async function delete_all_selected_sets() {
 
       dialog.value.show_dialog = false;
 
-      selected_sets.value.forEach(async (id_set) => {
-        show_loader.value = true;
+      show_loader.value = true;
 
+      selected_sets.value.forEach(async (id_set, index) => {
         let result = await set_store.delete_specific_set(
           id_set,
           route.params.id_exercise
         );
 
-        sets_of_exercise.value = [
-          ...(await set_store.find_all_sets_of_exercise(
-            route.params.id_exercise
-          )),
-        ];
+        if (index === selected_sets.value.length - 1 && result) {
+          sets_of_exercise.value = [
+            ...(await set_store.find_all_sets_of_exercise(
+              route.params.id_exercise
+            )),
+          ];
 
-        change_set_order();
+          await change_set_order();
 
-        if (result) {
           show_loader.value = false;
         }
       });
@@ -728,21 +730,21 @@ async function delete_all_selected_photos() {
 
       dialog.value.show_dialog = false;
 
-      selected_photos.value.forEach(async (public_id) => {
-        show_loader.value = true;
+      show_loader.value = true;
 
+      selected_photos.value.forEach(async (public_id, index) => {
         let result = await photo_exercise_store.delete_photo_of_exercise(
           public_id,
           route.params.id_exercise
         );
 
-        photos_of_exercise.value = [
+        if (index === selected_photos.value.length - 1 && result) {
+          photos_of_exercise.value = [
           ...(await photo_exercise_store.find_all_photos_of_exercise(
             route.params.id_exercise
           )),
         ];
 
-        if (result) {
           show_loader.value = false;
         }
       });
@@ -819,7 +821,6 @@ async function on_photo_change(event) {
 
       new_photo.value = new FormData();
     } catch (err) {
-      
       error.value.has_error = true;
 
       error.value.error_message = err.response.data.resource.message;
@@ -966,7 +967,7 @@ onBeforeMount(async () => {
     sets_of_exercise.value = [
       ...(await set_store.find_all_sets_of_exercise(route.params.id_exercise)),
     ];
-    
+
     exercise_info.value = {
       ...(await exercise_store.find_specific_exercise(
         route.params.id_exercise
@@ -995,8 +996,6 @@ onBeforeMount(async () => {
         route.params.id_exercise
       )),
     ];
-
-    
   } catch (err) {
     error.value.has_error = true;
 
