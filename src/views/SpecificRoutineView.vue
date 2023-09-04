@@ -730,7 +730,7 @@ async function add_all_added_exercises(exercises) {
           }
         );
 
-        if (index === exercises.value.length - 1 && result) {
+        if (index === exercises.length - 1 && result) {
           exercises_of_routine.value = [
             ...(await exercise_store.find_exercises_of_routine(
               route.params.id_routine
