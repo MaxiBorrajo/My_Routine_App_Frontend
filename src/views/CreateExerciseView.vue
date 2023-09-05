@@ -743,6 +743,7 @@ onBeforeMount(async () => {
       .v-list {
         gap: 10px;
         overflow: hidden;
+        padding: 0 20px;
         .v-list-item {
           position: relative;
           padding-right: 40px;

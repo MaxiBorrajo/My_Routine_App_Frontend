@@ -49,7 +49,8 @@ function rest_finished() {
   height: auto;
   min-height: 100vh;
   max-width: 668px;
-
+  padding: 100px 0;
+  
   position: relative;
 
   //Color

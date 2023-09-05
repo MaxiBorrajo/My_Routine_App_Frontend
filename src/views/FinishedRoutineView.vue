@@ -27,7 +27,6 @@
       :button_width="250"
       :button_height="60"
       button-prepend-icon="fa-solid fa-house"
-      :button-route="{ name: 'Home' }"
       @click="update_usage"
       class="home_button"
     />
@@ -40,6 +39,7 @@ import { ref } from "vue";
 import ButtonComponent from "@/components/ButtonComponent.vue";
 import { useRoutineStore } from "../stores/routine_store";
 import ErrorComponent from "@/components/ErrorComponent.vue";
+import router from "../router";
 
 //Variables
 
@@ -60,10 +60,14 @@ function update_usage() {
   try {
     props.routine_info.usage_routine++;
 
-    routine_store.update_specific_routine(
+    let result = routine_store.update_specific_routine(
       props.routine_info.id_routine,
       props.routine_info
     );
+
+    if (result) {
+      router.push({ name: "Dashboard" });
+    }
   } catch (err) {
     error.value.has_error = true;
 
