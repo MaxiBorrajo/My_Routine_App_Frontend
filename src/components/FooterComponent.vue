@@ -4,7 +4,12 @@
     <!-- Footer top -->
     <div class="footer-top">
       <router-link title="home" class="footer-top__a" :to="{ name: 'Home' }">
-        <h3 class="footer-top__h3">MyRoutineApp</h3>
+        <h3 class="footer-top__h3">
+          MyR<img
+            src="src/assets/logo-my-routine-app.png"
+            alt="Logo de MyRoutineApp"
+          />utineApp
+        </h3>
       </router-link>
     </div>
     <!-- Social networks -->
@@ -69,11 +74,17 @@
 
     //Color
     color: rgb(var(--v-theme-text));
+    img {
+      width: 15px;
+    }
   }
 
   //Footer top h3 style
   .footer-top__h3 {
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   //Section with social networks

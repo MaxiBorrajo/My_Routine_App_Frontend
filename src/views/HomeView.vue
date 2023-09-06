@@ -7,7 +7,10 @@
     >
       <!-- Home section title -->
       <v-card-title>
-        <h1 class="card_title text-center">MyRoutineApp</h1>
+        <h1 class="text-center d-flex align-center justify-center">MyR<img
+            src="src/assets/logo-my-routine-app.png"
+            alt="Logo de MyRoutineApp"
+          />utineApp</h1>
       </v-card-title>
       <!-- Home section toggle -->
       <v-card-subtitle class="d-flex justify-center">
@@ -117,6 +120,12 @@ onBeforeMount(async () => {
 
     //Color
     color: rgb(var(--v-theme-text));
+
+    .v-card-title{
+      img{
+        width: 25px;
+      }
+    }
 
     //Home view subtitle
     .v-card-subtitle {
