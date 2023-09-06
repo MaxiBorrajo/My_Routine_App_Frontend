@@ -8,7 +8,7 @@
       <!-- Home section title -->
       <v-card-title>
         <h1 class="text-center d-flex align-center justify-center">MyR<img
-            src="src/assets/logo-my-routine-app.png"
+            :src="logo"
             alt="Logo de MyRoutineApp"
           />utineApp</h1>
       </v-card-title>
@@ -42,7 +42,7 @@ import { useTheme } from "vuetify";
 import { useRoute } from "vue-router";
 import VueCookies from "vue-cookies";
 import router from "../router";
-
+import logo from '../assets/logo-my-routine-app.png'
 //Variables
 
 const current_view = ref("Sign in");

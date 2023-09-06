@@ -6,7 +6,7 @@
       <router-link title="home" class="footer-top__a" :to="{ name: 'Home' }">
         <h3 class="footer-top__h3">
           MyR<img
-            src="logo-my-routine-app.png"
+            :src="logo"
             alt="Logo de MyRoutineApp"
           />utineApp
         </h3>
@@ -37,7 +37,9 @@
   </footer>
 </template>
 
-<script setup></script>
+<script setup>
+import logo from '../assets/logo-my-routine-app.png'
+</script>
 
 <style scoped lang="scss">
 //Footer's style
