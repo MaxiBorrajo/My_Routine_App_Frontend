@@ -6,7 +6,7 @@
       <router-link title="home" class="footer-top__a" :to="{ name: 'Home' }">
         <h3 class="footer-top__h3">
           MyR<img
-            src="/src/assets/logo-my-routine-app.png"
+            src="assets/logo-my-routine-app.png"
             alt="Logo de MyRoutineApp"
           />utineApp
         </h3>
