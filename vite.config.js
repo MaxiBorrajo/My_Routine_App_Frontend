@@ -19,7 +19,7 @@ export default defineConfig({
       ],
       manifest: {
         name: "MyRoutineApp",
-        short_name: "MyRoutine",
+        short_name: "MyRoutineApp",
         description:
           "MyRoutineApp: tu app de ejercicios personalizados. Registra rutinas y crea ejercicios con series, peso y descanso. Sube fotos, ve tu progreso y mejora día a día. ¡Mejora tu bienestar con MyRoutine!",
         theme_color: "#1a1919",
@@ -36,6 +36,13 @@ export default defineConfig({
             src: "./public/android-chrome-512x512.png",
             sizes: "512x512",
             type: "image/png",
+            purpose:'any'
+          },
+          {
+            src: "./public/android-chrome-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose:'maskable'
           },
         ],
       },
