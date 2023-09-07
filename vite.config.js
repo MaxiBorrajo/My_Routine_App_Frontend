@@ -3,13 +3,13 @@ import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import sass from "sass";
-import VitePWA from "vite-plugin-pwa";
+import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
   plugins: [
     vue(),
     VitePWA({
-      includeAssets:['favicon.ico'],
+      includeAssets: ["favicon.ico"],
       manifest: {
         name: "MyRoutineApp",
         short_name: "MyRoutine",
