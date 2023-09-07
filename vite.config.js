@@ -14,6 +14,8 @@ export default defineConfig({
         "favicon.ico",
         "apple-touch-icon.png",
         "safari-pinned-tab.svg",
+        "favicon-32x32.png",
+        "favicon-16x16.png"
       ],
       manifest: {
         name: "MyRoutineApp",
@@ -26,12 +28,12 @@ export default defineConfig({
         display: "standalone",
         icons: [
           {
-            src: "/android-chrome-192x192.png",
+            src: "./public/android-chrome-192x192.png",
             sizes: "192x192",
             type: "image/png",
           },
           {
-            src: "/android-chrome-512x512.png",
+            src: "./public/android-chrome-512x512.png",
             sizes: "512x512",
             type: "image/png",
           },
