@@ -9,8 +9,12 @@ export default defineConfig({
   plugins: [
     vue(),
     VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ["favicon.ico"],
+      registerType: "autoUpdate",
+      includeAssets: [
+        "favicon.ico",
+        "apple-touch-icon.png",
+        "safari-pinned-tab.svg",
+      ],
       manifest: {
         name: "MyRoutineApp",
         short_name: "MyRoutine",
@@ -30,7 +34,7 @@ export default defineConfig({
             src: "/android-chrome-512x512.png",
             sizes: "512x512",
             type: "image/png",
-          }
+          },
         ],
       },
     }),
