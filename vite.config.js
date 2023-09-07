@@ -12,21 +12,36 @@ export default defineConfig({
       includeAssets: ["favicon.ico"],
       manifest: {
         name: "MyRoutineApp",
-        short_name: "MyRoutineApp",
+        short_name: "MyRoutine",
         description:
           "MyRoutineApp: tu app de ejercicios personalizados. Registra rutinas y crea ejercicios con series, peso y descanso. Sube fotos, ve tu progreso y mejora día a día. ¡Mejora tu bienestar con MyRoutine!",
         theme_color: "#1a1919",
+        background_color: "#ffffff",
+        start_url: "/",
+        display: "standalone",
         icons: [
           {
-            src: "src/assets/logo_192x192.png",
+            src: "./src/assets/logo_192x192.png",
             sizes: "192x192",
             type: "image/png",
           },
           {
-            src: "src/assets/logo_512x512.png",
+            src: "./src/assets/logo_512x512.png",
             sizes: "512x512",
             type: "image/png",
-          }
+          },
+          {
+            src: "./src/assets/logo_192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "maskable",
+          },
+          {
+            src: "./src/assets/logo_512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
+          },
         ],
       },
     }),
