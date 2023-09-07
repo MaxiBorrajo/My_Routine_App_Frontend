@@ -5,10 +5,7 @@
     <div class="footer-top">
       <router-link title="home" class="footer-top__a" :to="{ name: 'Home' }">
         <h3 class="footer-top__h3">
-          MyR<img
-            :src="logo"
-            alt="Logo de MyRoutineApp"
-          />utineApp
+          MyR<img :src="logo" alt="Logo de MyRoutineApp" />utineApp
         </h3>
       </router-link>
     </div>
@@ -38,7 +35,20 @@
 </template>
 
 <script setup>
-import logo from '../assets/logo-my-routine-app.png'
+import { computed } from "vue";
+import { useTheme } from "vuetify";
+import logo_dark from "../assets/logo-my-routine-app-dark.png";
+import logo_light from "../assets/logo-my-routine-app-light.png";
+
+const logo = computed(() => {
+  const theme = useTheme();
+
+  if (theme.global.name.value === "light") {
+    return logo_dark;
+  } else {
+    return logo_light;
+  }
+});
 </script>
 
 <style scoped lang="scss">

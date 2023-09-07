@@ -8,7 +8,7 @@
       <!-- Home section title -->
       <v-card-title>
         <h1 class="text-center d-flex align-center justify-center">MyR<img
-            :src="logo"
+            :src="logo_dark"
             alt="Logo de MyRoutineApp"
           />utineApp</h1>
       </v-card-title>
@@ -33,7 +33,7 @@
 
 <script setup>
 //Imports
-import { ref, onBeforeMount } from "vue";
+import { ref, onBeforeMount, onUpdated } from "vue";
 import ButtonToggleComponent from "@/components/ButtonToggleComponent.vue";
 import LoginView from "@/views/LoginView.vue";
 import RegisterView from "@/views/RegisterView.vue";
@@ -42,7 +42,7 @@ import { useTheme } from "vuetify";
 import { useRoute } from "vue-router";
 import VueCookies from "vue-cookies";
 import router from "../router";
-import logo from '../assets/logo-my-routine-app.png'
+import logo_dark from '../assets/logo-my-routine-app-dark.png'
 //Variables
 
 const current_view = ref("Sign in");
@@ -86,7 +86,9 @@ async function get_theme() {
 }
 
 //Lifehooks
-
+onUpdated(async () => {
+  await get_theme();
+}),
 
 //Lifehook that set the current theme before view render
 onBeforeMount(async () => {
