@@ -9,38 +9,28 @@ export default defineConfig({
   plugins: [
     vue(),
     VitePWA({
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
         name: "MyRoutineApp",
         short_name: "MyRoutineApp",
         display: "standalone",
-        background_color: "#1a1919",
+        background_color: "#ffffff",
         description: "MyRoutineApp: tu app de ejercicios personalizados. Registra rutinas y crea ejercicios con series, peso y descanso. Sube fotos, ve tu progreso y mejora día a día. ¡Mejora tu bienestar con MyRoutine!",
-        theme_color: "#ffffff",
+        theme_color: "#1a1919",
         icons: [
           {
             src: "/android-chrome-512x512.png",
             sizes: "512x512",
             type: "image/png",
-            purpose: "any maskable",
+            purpose: "maskable",
           },
-        ],
-      },
-      workbox: {
-        runtimeCaching: [
           {
-            urlPattern: ({ url }) => {
-              return url.pathname.startsWith("/v1");
-            },
-            handler: "CacheFirst",
-            options: {
-              cacheName: "api-cache",
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
+            src: "/android-chrome-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
           },
         ],
-      },
+      }
     }),
   ],
   css: {
