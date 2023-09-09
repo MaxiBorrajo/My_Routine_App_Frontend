@@ -1120,7 +1120,7 @@ onBeforeMount(async () => {
     .v-list {
       gap: 10px;
       overflow: hidden;
-      padding: 0 20px;
+      padding-right: 40px;
       .v-list-item {
         position: relative;
         padding-right: 40px;
@@ -1184,6 +1184,14 @@ p {
       align-items: center;
       justify-content: center;
     }
+
+    &__sets {
+    .v-list {
+      padding-right: 0px;
+    }
   }
+  }
+
+  
 }
 </style>

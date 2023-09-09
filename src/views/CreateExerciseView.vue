@@ -400,7 +400,7 @@ const snackbar_text = ref("");
 /*Function that updates the current exercise*/
 async function create_exercise() {
   show_loader.value = true;
-  
+
   const { valid } = await form.value.validate();
 
   if (valid) {
@@ -743,7 +743,7 @@ onBeforeMount(async () => {
       .v-list {
         gap: 10px;
         overflow: hidden;
-        padding: 0 20px;
+        padding-right: 40px;
         .v-list-item {
           position: relative;
           padding-right: 40px;
@@ -800,6 +800,12 @@ onBeforeMount(async () => {
         flex-direction: row;
         align-items: center;
         justify-content: center;
+      }
+
+      &__sets {
+        .v-list {
+          padding-right: 0px;
+        }
       }
     }
   }

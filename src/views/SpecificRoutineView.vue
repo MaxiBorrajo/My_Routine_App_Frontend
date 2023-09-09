@@ -937,13 +937,14 @@ onBeforeMount(async () => {
 
   //Routine section exercises
   &__exercises {
-    gap: 10px;
     .v-list {
       gap: 10px;
       align-items: center;
+      padding-right: 40px;
       .v-list-item {
         position: relative;
         padding-right: 40px;
+        margin-top: 10px;
         //Routine exercise checkbox
         .exercise_checkbox {
           position: absolute;
@@ -1066,6 +1067,13 @@ onBeforeMount(async () => {
     #no_exercises_found {
       color: rgb(var(--v-theme-text));
       font-weight: 700;
+    }
+
+    //Routine section exercises
+    &__exercises {
+      .v-list {
+        padding-right: 0px;
+      }
     }
   }
 }

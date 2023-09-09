@@ -168,6 +168,7 @@
               :radio_group_values="['light', 'dark', 'custom']"
               :radio_group_colors="['#1a1919', '#ffffff', '#ff0000']"
               v-model="user_info.theme"
+              @update:modelValue="change_theme"
             />
           </div>
           <!-- Change rating -->
@@ -281,6 +282,7 @@
 //Imports
 import { ref, onBeforeMount } from "vue";
 import { useUserStore } from "../stores/user_store";
+import { useTheme } from "vuetify";
 import rules from "../utils/rules";
 import router from "../router";
 import BackButtonComponent from "@/components/BackButtonComponent.vue";
@@ -303,6 +305,8 @@ const user_info = ref(null);
 const new_user_info = ref(new FormData());
 
 const user_store = useUserStore();
+
+const theme = useTheme();
 
 const error = ref({
   has_error: false,
@@ -425,6 +429,10 @@ function open_dialog(dialog_title, dialog_text, dialog_action) {
   dialog.value.dialog_action = dialog_action;
 
   dialog.value.show_dialog = true;
+}
+
+function change_theme(){
+  theme.global.name.value = user_info.value.theme
 }
 
 /*Lifehooks */

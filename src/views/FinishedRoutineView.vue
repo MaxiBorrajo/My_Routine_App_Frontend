@@ -56,13 +56,11 @@ const error = ref({
 
 //Methods
 /*Function that updates the usage of a routine*/
-function update_usage() {
+async function update_usage() {
   try {
-    props.routine_info.usage_routine++;
-
-    let result = routine_store.update_specific_routine(
+    let result = await routine_store.update_specific_routine(
       props.routine_info.id_routine,
-      props.routine_info
+      { usage_routine: props.routine_info.usage_routine + 1 }
     );
 
     if (result) {

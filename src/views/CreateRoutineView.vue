@@ -558,6 +558,7 @@ onBeforeMount(async () => {
     .v-list {
       gap: 10px;
       align-items: center;
+      padding-right: 40px;
       .v-list-item {
         position: relative;
         padding-right: 40px;
@@ -673,6 +674,12 @@ onBeforeMount(async () => {
       color: rgb(var(--v-theme-text));
       font-weight: 700;
     }
+
+    &__exercises {
+    .v-list {
+      padding-right: 0px;
+    }
+  }
   }
 }
 </style>
