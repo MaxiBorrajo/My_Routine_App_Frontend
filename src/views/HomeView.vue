@@ -106,6 +106,7 @@ onBeforeMount(async () => {
 //Home view styles
 .home_section {
   //Sizing
+  min-height: 100vh;
   height: auto;
   width: 100%;
   max-width: 600px;
