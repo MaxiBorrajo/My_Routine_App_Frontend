@@ -9,14 +9,22 @@ export default defineConfig({
   plugins: [
     vue(),
     VitePWA({
+      includeAssets: [
+        "favicon.ico",
+        "apple-touch-icon.png",
+        "safari-pinned-tab.svg",
+        "favicon-32x32.png",
+        "favicon-16x16.png",
+      ],
       manifest: {
         name: "MyRoutineApp",
         short_name: "MyRoutineApp",
         display: "standalone",
         background_color: "#ffffff",
-        description: "MyRoutineApp: tu app de ejercicios personalizados. Registra rutinas y crea ejercicios con series, peso y descanso. Sube fotos, ve tu progreso y mejora día a día. ¡Mejora tu bienestar con MyRoutine!",
+        description:
+          "MyRoutineApp: tu app de ejercicios personalizados. Registra rutinas y crea ejercicios con series, peso y descanso. Sube fotos, ve tu progreso y mejora día a día. ¡Mejora tu bienestar con MyRoutine!",
         theme_color: "#1a1919",
-        start_url: '/',
+        start_url: "/",
         icons: [
           {
             src: "/pwa-512x512.png",
@@ -28,10 +36,10 @@ export default defineConfig({
             src: "/pwa-192x192.png",
             sizes: "192x192",
             type: "image/png",
-            purpose: "any"
+            purpose: "any",
           },
         ],
-      }
+      },
     }),
   ],
   css: {
