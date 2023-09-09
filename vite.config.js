@@ -9,8 +9,6 @@ export default defineConfig({
   plugins: [
     vue(),
     VitePWA({
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'safari-pinned-tab.svg',
-    'favicon-32x32.png', 'favicon-16x16.png'],
       manifest: {
         name: "MyRoutineApp",
         short_name: "MyRoutineApp",
@@ -24,13 +22,13 @@ export default defineConfig({
             src: "/pwa-512x512.png",
             sizes: "512x512",
             type: "image/png",
-            purpose: "maskable any",
+            purpose: "any",
           },
           {
             src: "/pwa-192x192.png",
             sizes: "192x192",
             type: "image/png",
-            purpose: "maskable any"
+            purpose: "any"
           },
         ],
       }
