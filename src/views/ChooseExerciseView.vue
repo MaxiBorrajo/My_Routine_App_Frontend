@@ -512,6 +512,7 @@ onBeforeMount(async () => {
     .v-list {
       //Sizing
       width: 100%;
+      padding-right: 40px;
 
       //Display
       gap: 10px;
@@ -556,5 +557,13 @@ onBeforeMount(async () => {
 //Selects checks
 .checks {
   gap: 5px;
+}
+
+@media only screen and (min-width: 768px) {
+  .exercise_section {
+    .v-list {
+      padding-right:0px;
+    }
+  }
 }
 </style>

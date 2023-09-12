@@ -1072,6 +1072,19 @@ onBeforeMount(async () => {
     //Routine section exercises
     &__exercises {
       .v-list {
+        padding-right: 40px;
+      }
+    }
+  }
+}
+
+@media only screen and (min-width: 768px) {
+  //Routine section styles
+  .routine-section {
+
+    //Routine section exercises
+    &__exercises {
+      .v-list {
         padding-right: 0px;
       }
     }
